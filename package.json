@@ -1,8 +1,8 @@
 {
-  "name": "cryptogalaxy",
+  "name": "dataviz_future_frontiers",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://hunkim98.github.io/cryptogalaxy",
+  "homepage": "https://hunkim98.github.io/dataviz_future_frontiers",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
