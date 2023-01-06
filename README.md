@@ -1,3 +1,3 @@
-# Crypto Galaxy
+# Dataviz Future Frontier
 
-This project attempts to visualize the cryptocurrency market into a galaxy
+This project attempts to visualize the future frontiers
