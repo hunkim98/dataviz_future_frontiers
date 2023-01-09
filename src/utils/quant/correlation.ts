@@ -34,8 +34,6 @@ export const calcCorrelationCoefficient = (
     // .slice(-10)
     .map((el) => el.prev_closing_price);
 
-  console.log(prevClosingPricesA);
-
   const prevClosingPricesMeanA =
     prevClosingPricesA.reduce((a, b) => a + b, 0) / prevClosingPricesA.length;
 

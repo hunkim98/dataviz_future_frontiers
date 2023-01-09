@@ -12,12 +12,22 @@ export interface FrontierTimeSeriesData {
 }
 export interface FrontierData {
   name: string;
+  frontier: string;
   buzzIndex: number;
-  timeSeries: Array<FrontierTimeSeriesData>;
+  type: string;
+  now: string;
+  2025: string;
+  2030: string;
+  2040: string;
+  2050: string;
+  beyond: string;
+  sources: string; // separated by comma
+  urls: string[]; //starting from index 12
+  // last index is 19
 }
 
 interface FrontiersContextElements {
-  frontiers: Map<string, FrontierData> | undefined;
+  frontiers: Map<string, FrontierData[]> | undefined;
 }
 
 const FrontiersContext = createContext<FrontiersContextElements>(
@@ -25,14 +35,64 @@ const FrontiersContext = createContext<FrontiersContextElements>(
 );
 
 const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
-  useEffect(() => {
-    GetData("frontiers.csv").then((res) => {
-      console.log(res);
-    });
-  }, []);
-  const [frontiers, setFrontiers] = useState<Map<string, FrontierData>>(
+  const [frontiers, setFrontiers] = useState<Map<string, FrontierData[]>>(
     new Map()
   );
+  useEffect(() => {
+    GetData("frontiers.csv").then((res) => {
+      const frontierSet = new Set<string>();
+      const frontierData: FrontierData[] = [];
+      for (let i = 1; i < res.data.length; i++) {
+        const row = res.data[i] as any;
+        const name = row[0];
+        const frontier = row[1];
+        const buzzIndex = row[2];
+        const type = row[3];
+        const now = row[4];
+        const _2025 = row[5];
+        const _2030 = row[6];
+        const _2040 = row[7];
+        const _2050 = row[8];
+        const beyond = row[9];
+        const sources = row[10];
+        const urls = row.slice(11, 19);
+        const data: FrontierData = {
+          name,
+          frontier,
+          buzzIndex,
+          type,
+          now,
+          "2025": _2025,
+          "2030": _2030,
+          "2040": _2040,
+          "2050": _2050,
+          beyond,
+          sources,
+          urls,
+        };
+        if (frontier) {
+          frontierSet.add(frontier);
+        }
+        frontierData.push(data);
+      }
+      for (
+        let it = frontierSet.values(), val: string = "";
+        (val = it.next().value);
+
+      ) {
+        const filtered = frontierData.filter((d) => d.frontier === val);
+        setFrontiers((prev) => {
+          const newMap = new Map(prev);
+          newMap.set(val, filtered);
+          return newMap;
+        });
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    console.log(frontiers);
+  }, [frontiers]);
 
   return (
     <FrontiersContext.Provider value={{ frontiers }}>

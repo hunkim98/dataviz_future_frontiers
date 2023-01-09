@@ -6,7 +6,6 @@ async function fetchCsv(fileName: string) {
   const result = await reader.read();
   const decoder = new TextDecoder("utf-8");
   const csv = await decoder.decode(result.value);
-  console.log("csv", csv);
   return csv;
 }
 export async function GetData(fileName: string) {

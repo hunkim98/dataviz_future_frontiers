@@ -301,7 +301,6 @@ export class Planet {
       minSpeed,
       maxSpeed
     );
-    console.log(this.name, speed);
     return speed;
   }
 

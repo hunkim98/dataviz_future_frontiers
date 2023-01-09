@@ -19,8 +19,6 @@ function useHandleClickOutside({
         if (setOpenBooleanState) setOpenBooleanState(false);
       }
     }
-    console.log("hihihii");
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);

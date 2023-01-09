@@ -115,23 +115,23 @@ const CryptoContextProvider: React.FC<Props> = ({ children }) => {
       // );
       const mfi = calcMFI(otherCryptoDayCandles);
       const ticker = await getTicker(market);
-      setCryptoData((prev) => {
-        const newMap = new Map(prev);
-        newMap.set(market.replace("KRW-", ""), {
-          increaseRatio,
-          coefficient,
-          volume,
-          currentPrice: ticker.trade_price,
-          support,
-          resistance,
-          rsi,
-          foreColor: coinMarket.foreColor,
-          backColor: coinMarket.backColor,
-          logoImg: coinMarket.logoImg,
-          mfi,
-        });
-        return newMap;
-      });
+      // setCryptoData((prev) => {
+      //   const newMap = new Map(prev);
+      //   newMap.set(market.replace("KRW-", ""), {
+      //     increaseRatio,
+      //     coefficient,
+      //     volume,
+      //     currentPrice: ticker.trade_price,
+      //     support,
+      //     resistance,
+      //     rsi,
+      //     foreColor: coinMarket.foreColor,
+      //     backColor: coinMarket.backColor,
+      //     logoImg: coinMarket.logoImg,
+      //     mfi,
+      //   });
+      //   return newMap;
+      // });
     },
     []
   );
@@ -142,7 +142,6 @@ const CryptoContextProvider: React.FC<Props> = ({ children }) => {
           const btcCandles = res;
           btcCandles.pop(); // we don't care the last candle(today candle)
           const increaseRatio = calcIncreaseRatioOfMA(btcCandles.slice(-10), 5);
-          console.log(increaseRatio, "btc");
           const sunCoinGeckoData = CoinGeckoSimplifiedJson.findIndex(
             (element) =>
               element.symbol === sunCrypto.split("-")[1].toLowerCase()
