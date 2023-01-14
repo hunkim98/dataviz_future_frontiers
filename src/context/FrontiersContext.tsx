@@ -27,7 +27,12 @@ export interface FrontierData {
 }
 
 interface FrontiersContextElements {
-  frontiers: Map<string, FrontierData[]> | undefined;
+  frontiers: Map<string, FrontierData[]>;
+  currentFrontier: {
+    title: string;
+    data: FrontierData[];
+  } | null;
+  changeFrontier: (frontierName: string) => void;
 }
 
 const FrontiersContext = createContext<FrontiersContextElements>(
@@ -38,6 +43,16 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
   const [frontiers, setFrontiers] = useState<Map<string, FrontierData[]>>(
     new Map()
   );
+  const [currentFrontier, setCurrentFrontier] = useState<{
+    title: string;
+    data: FrontierData[];
+  } | null>(null);
+  const changeFrontier = (frontierName: string) => {
+    const data = frontiers.get(frontierName);
+    if (data) {
+      setCurrentFrontier({ title: frontierName, data });
+    }
+  };
   useEffect(() => {
     GetData("frontiers.csv").then((res) => {
       const frontierSet = new Set<string>();
@@ -91,11 +106,21 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    console.log(frontiers);
-  }, [frontiers]);
+    const allFrontierData = frontiers.values();
+    const firstFrontier = allFrontierData.next().value;
+    if (firstFrontier) {
+      setCurrentFrontier({
+        title: firstFrontier[0].frontier,
+        data: firstFrontier,
+      });
+    }
+    // setCurrentFrontier(frontiers)
+  }, [frontiers, setCurrentFrontier]);
 
   return (
-    <FrontiersContext.Provider value={{ frontiers }}>
+    <FrontiersContext.Provider
+      value={{ frontiers, currentFrontier, changeFrontier }}
+    >
       {children}
     </FrontiersContext.Provider>
   );

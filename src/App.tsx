@@ -1,7 +1,5 @@
-import React, { useRef } from "react";
-import logo from "assets/logo.png";
 import "./App.css";
-import Galaxy from "./components/Galaxy";
+import Infographic from "./components/Infographic";
 import { CryptoContextProvider } from "./context/CryptoContext";
 import { FrontiersContextProvider } from "context/FrontiersContext";
 
@@ -12,7 +10,6 @@ function App() {
         display: "flex",
         flexDirection: "column",
         minHeight: "100vh",
-        backgroundColor: "black",
         fontFamily: "Righteous",
       }}
     >
@@ -20,9 +17,9 @@ function App() {
         <h1>Crypto Galaxy</h1>
       </header> */}
       <FrontiersContextProvider>
-        <CryptoContextProvider>
-          <Galaxy />
-        </CryptoContextProvider>
+        {/* <CryptoContextProvider> */}
+        <Infographic />
+        {/* </CryptoContextProvider> */}
       </FrontiersContextProvider>
     </div>
   );
