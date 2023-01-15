@@ -285,7 +285,7 @@ export class InfographicCanvas {
     foreColor: string,
     backColor: string,
     time: string,
-    avgBuzz: number
+    totalBuzz: number
   ) {
     if (!this.sun) {
       this.sun = new Sun(
@@ -294,14 +294,13 @@ export class InfographicCanvas {
         time,
         foreColor,
         backColor,
-        avgBuzz,
+        totalBuzz,
 
         this.dpr
       );
     } else {
-      this.sun.update({ name, time, avgBuzz });
+      this.sun.update({ name, time, totalBuzz: totalBuzz });
     }
-    console.log(avgBuzz, "hi");
   }
 
   setPlanet(

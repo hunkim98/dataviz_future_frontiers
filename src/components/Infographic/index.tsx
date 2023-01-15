@@ -86,7 +86,7 @@ const Infographic = () => {
       "#555",
       "#fff",
       FrontierTime._2025,
-      currentFrontier.avgBuzz
+      currentFrontier.totalBuzz
     );
     infographicCanvasRef.current.setPlanet(
       currentFrontier.data,

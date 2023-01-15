@@ -42,7 +42,7 @@ interface FrontiersContextElements {
   currentFrontier: {
     title: string;
     data: FrontierData[];
-    avgBuzz: number;
+    totalBuzz: number;
   } | null;
   changeFrontier: (frontierName: string) => void;
 }
@@ -58,7 +58,7 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
   const [currentFrontier, setCurrentFrontier] = useState<{
     title: string;
     data: FrontierData[];
-    avgBuzz: number;
+    totalBuzz: number;
   } | null>(null);
   const changeFrontier = (frontierName: string) => {
     const data = frontiers.get(frontierName);
@@ -71,19 +71,18 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
           } else {
             return acc;
           }
-        }, 0) / data.length
+        }, 0)
       );
       setCurrentFrontier({
         title: frontierName,
         data,
-        avgBuzz:
-          data.reduce((acc, curr) => {
-            if (curr.buzz) {
-              return acc + curr.buzz;
-            } else {
-              return acc;
-            }
-          }, 0) / data.length,
+        totalBuzz: data.reduce((acc, curr) => {
+          if (curr.buzz) {
+            return acc + curr.buzz;
+          } else {
+            return acc;
+          }
+        }, 0),
       });
     }
   };
@@ -136,7 +135,7 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
 
       ) {
         const filtered = frontierData.filter((d) => d.frontier === val);
-        const avgBuzz = filtered.reduce((acc, curr) => {
+        const totalBuzz = filtered.reduce((acc, curr) => {
           if (curr.buzz) {
             return acc + curr.buzz;
           } else {
@@ -147,7 +146,7 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
           const newMap = new Map(prev);
           newMap.set(
             val,
-            filtered.map((d) => ({ ...d, avgBuzz }))
+            filtered.map((d) => ({ ...d, avgBuzz: totalBuzz }))
           );
           return newMap;
         });
@@ -162,7 +161,7 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
       setCurrentFrontier({
         title: firstFrontier[0].frontier,
         data: firstFrontier,
-        avgBuzz: firstFrontier.reduce((acc: any, curr: any) => {
+        totalBuzz: firstFrontier.reduce((acc: any, curr: any) => {
           if (curr.buzz) {
             return acc + curr.buzz;
           } else {

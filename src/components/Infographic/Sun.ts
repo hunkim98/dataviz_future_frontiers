@@ -18,18 +18,18 @@ export class Sun {
   time: string;
   dpr: number;
   canvasDrawPosition: Vector2;
-  avgBuzz: number;
+  totalBuzz: number;
   constructor(
     canvas: HTMLCanvasElement,
     name: string,
     time: string,
     foreColor: string,
     backColor: string,
-    avgBuzz: number,
+    totalBuzz: number,
     dpr: number
   ) {
     this.name = name;
-    this.avgBuzz = avgBuzz;
+    this.totalBuzz = totalBuzz;
     this.canvas = canvas;
     this.foreColor = foreColor;
     this.backColor = backColor;
@@ -41,7 +41,6 @@ export class Sun {
       this.position,
       this.dpr
     );
-    console.log(avgBuzz);
     this.setBrightness(0);
   }
 
@@ -72,15 +71,15 @@ export class Sun {
     ctx.restore();
   }
 
-  update(data: Partial<{ time: string; name: string; avgBuzz: number }>) {
+  update(data: Partial<{ time: string; name: string; totalBuzz: number }>) {
     if (data.time) {
       this.time = data.time;
     }
     if (data.name) {
       this.name = data.name;
     }
-    if (data.avgBuzz) {
-      this.avgBuzz = data.avgBuzz;
+    if (data.totalBuzz) {
+      this.totalBuzz = data.totalBuzz;
     }
   }
 
