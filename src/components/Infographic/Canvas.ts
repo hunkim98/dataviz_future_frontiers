@@ -279,8 +279,19 @@ export class InfographicCanvas {
     this.ctx.restore();
   }
 
-  setSun(name: string, foreColor: string, backColor: string) {
-    this.sun = new Sun(this.element, name, foreColor, backColor, this.dpr);
+  setSun(name: string, foreColor: string, backColor: string, time: string) {
+    if (!this.sun) {
+      this.sun = new Sun(
+        this.element,
+        name,
+        time,
+        foreColor,
+        backColor,
+        this.dpr
+      );
+    } else {
+      this.sun.update({ name, time });
+    }
   }
 
   addPlanet(
@@ -418,11 +429,5 @@ export class InfographicCanvas {
 
   clear() {
     this.ctx.clearRect(0, 0, this.width, this.height);
-  }
-
-  destroy() {
-    this.clear();
-    this.planets = [];
-    this.element.removeEventListener("mousemove", this.onMouseMove);
   }
 }

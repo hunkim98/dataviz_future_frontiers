@@ -1,7 +1,13 @@
 import { FrontiersContext } from "context/FrontiersContext";
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { InfographicCanvas } from "./Canvas";
 
+enum FrontierTime {
+  "_2025" = "2025",
+  "_2030" = "2030",
+  "_2035" = "2035",
+  "_2040" = "2040",
+}
 const Infographic = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const divRef = useRef<HTMLDivElement>(null);
@@ -10,16 +16,58 @@ const Infographic = () => {
   const { frontiers, changeFrontier, currentFrontier } =
     useContext(FrontiersContext);
 
+  const [time, setTime] = useState<FrontierTime>(FrontierTime._2025);
+
+  useEffect(() => {
+    const handleWheel = (event: WheelEvent) => {
+      const isDeltaPositive = event.deltaY < 0;
+      const isDeltaOverFifty = Math.abs(event.deltaY) > 20;
+      if (isDeltaPositive && isDeltaOverFifty) {
+        if (time === FrontierTime._2025) {
+          setTime(FrontierTime._2030);
+        } else if (time === FrontierTime._2030) {
+          setTime(FrontierTime._2035);
+        } else if (time === FrontierTime._2035) {
+          setTime(FrontierTime._2040);
+        }
+      } else if (!isDeltaPositive && isDeltaOverFifty) {
+        if (time === FrontierTime._2040) {
+          setTime(FrontierTime._2035);
+        } else if (time === FrontierTime._2035) {
+          setTime(FrontierTime._2030);
+        } else if (time === FrontierTime._2030) {
+          setTime(FrontierTime._2025);
+        }
+      }
+      console.log("hihih");
+    };
+    window.addEventListener("wheel", handleWheel);
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+    };
+  }, [time]);
+
+  useEffect(() => {
+    if (!infographicCanvasRef.current) {
+      return;
+    }
+    const sun = infographicCanvasRef.current.sun;
+    if (!sun) {
+      return;
+    }
+    infographicCanvasRef.current.sun!.update({
+      time,
+    });
+  }, [time]);
+
   useEffect(() => {
     if (!canvasRef.current) {
       return () => {};
     }
-    if (infographicCanvasRef.current) {
-      return;
+    if (!infographicCanvasRef.current) {
+      const infographicCanvas = new InfographicCanvas(canvasRef.current);
+      infographicCanvasRef.current = infographicCanvas;
     }
-    const infographicCanvas = new InfographicCanvas(canvasRef.current);
-    infographicCanvasRef.current = infographicCanvas;
-    return () => {};
   }, [frontiers]);
 
   useEffect(() => {
@@ -29,7 +77,12 @@ const Infographic = () => {
     if (!currentFrontier) {
       return;
     }
-    infographicCanvasRef.current.setSun(currentFrontier.title, "#555", "#fff");
+    infographicCanvasRef.current.setSun(
+      currentFrontier.title,
+      "#555",
+      "#fff",
+      FrontierTime._2025
+    );
   }, [currentFrontier]);
 
   useEffect(() => {

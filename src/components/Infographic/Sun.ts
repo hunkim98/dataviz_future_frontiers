@@ -1,5 +1,6 @@
 import { CryptoDataFields } from "context/CryptoContext";
 import { changeRelativeValueToRealValue } from "utils/clamp";
+import { wrapText } from "utils/text";
 import { convertCartesianToScreenPoint } from "../../utils/cartesian";
 import { Vector2 } from "../../utils/math/Vector2";
 
@@ -14,11 +15,13 @@ export class Sun {
   foreColor: string;
   backColor: string;
   name: string;
+  time: string;
   dpr: number;
   canvasDrawPosition: Vector2;
   constructor(
     canvas: HTMLCanvasElement,
     name: string,
+    time: string,
     foreColor: string,
     backColor: string,
     dpr: number
@@ -28,6 +31,7 @@ export class Sun {
     this.foreColor = foreColor;
     this.backColor = backColor;
     this.name = name;
+    this.time = time;
     this.dpr = dpr;
     this.canvasDrawPosition = convertCartesianToScreenPoint(
       this.canvas,
@@ -64,9 +68,12 @@ export class Sun {
     ctx.restore();
   }
 
-  update(data: Partial<CryptoDataFields>) {
-    if (data.increaseRatio) {
-      this.setBrightness(data.increaseRatio);
+  update(data: Partial<{ time: string; name: string }>) {
+    if (data.time) {
+      this.time = data.time;
+    }
+    if (data.name) {
+      this.name = data.name;
     }
   }
 
@@ -108,8 +115,25 @@ export class Sun {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     // ctx.fillStyle = `rgba(255, 255, 255, 0.8)`;
-    ctx.font = "18px Righteous";
-    ctx.fillText(this.name, drawPosition.x, drawPosition.y + Sun.radius + 20);
+    ctx.font = "35px Righteous";
+    const wrappedText = wrapText(
+      ctx,
+      this.name,
+      drawPosition.x,
+      drawPosition.y,
+      200,
+      35
+    );
+    let lastYLocation = 0;
+    wrappedText.forEach((line, index) => {
+      ctx.fillText(String(line[0]), line[1] as number, line[2] as number);
+      lastYLocation = line[2] as number;
+    });
+
+    ctx.save();
+    ctx.font = "24px Righteous";
+    ctx.fillText(this.time, drawPosition.x, lastYLocation + 40);
+    ctx.stroke();
   }
 
   setDpr(dpr: number) {
