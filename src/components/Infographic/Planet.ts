@@ -10,6 +10,8 @@ import { Rotator2D } from "../../utils/rotator2d";
 import { Spaceship, SpaceshipDirection } from "./Spaceship";
 import { Sun } from "./Sun";
 import { returnRandomInRange } from "utils/randomInRange";
+import Sentiment from "sentiment";
+import { wrapText } from "utils/text";
 
 export class Planet {
   name: string;
@@ -59,9 +61,11 @@ export class Planet {
     this.spaceShips = [];
     this.ctx = this.canvas.getContext("2d")!;
     this.distanceFromSun = 300;
-    this.speed = 0.1;
+    this.speed = 0.05;
     this.dpr = dpr;
 
+    const sentiment = new Sentiment();
+    console.log(sentiment.analyze(this.content).score, this.content);
     const positionAffineVector = new Vector2(this.distanceFromSun, 0).toAffine(
       true
     );
@@ -295,6 +299,7 @@ export class Planet {
       this.position,
       this.dpr
     );
+    // color the planet
     this.ctx.save();
     this.ctx.beginPath();
     this.ctx.arc(
@@ -305,7 +310,7 @@ export class Planet {
       2 * Math.PI,
       false
     );
-    this.ctx.fillStyle = `rgba(0, 55, 186, 1)`;
+    this.ctx.fillStyle = this.foreColor;
     this.ctx.fill();
     this.ctx.closePath();
     this.ctx.restore();
@@ -317,12 +322,22 @@ export class Planet {
     this.ctx.textAlign = "center";
     this.ctx.textBaseline = "middle";
     // this.ctx.fillStyle = `rgba(255, 255, 255, 0.8)`;
-    this.ctx.font = "12px Righteous";
-    this.ctx.fillText(
+    this.ctx.font = "18px Righteous";
+    const wrappedText = wrapText(
+      this.ctx,
       this.name,
       this.canvasDrawPosition.x,
-      this.canvasDrawPosition.y + this.radius + 15
+      this.canvasDrawPosition.y,
+      this.radius,
+      20
     );
+    wrappedText.forEach((item) => {
+      this.ctx.fillText(
+        item[0] as string,
+        item[1] as number,
+        item[2] as number
+      );
+    });
     // this.ctx.fillText(
     //   this.rotator.degree.toFixed(2),
     //   drawPosition.x,

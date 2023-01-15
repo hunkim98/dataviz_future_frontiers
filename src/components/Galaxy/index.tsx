@@ -49,17 +49,17 @@ const Galaxy: React.FC<Props> = () => {
       if (crypto[0] === "KRW-BTC") {
         //krw-btc is sun
         if (!galaxyCanvasRef.current.sun) {
-          galaxyCanvasRef.current.setSun(
-            crypto[0].replace("KRW-", ""),
-            crypto[1].increaseRatio,
-            crypto[1].foreColor,
-            crypto[1].backColor,
-            crypto[1].logoImg,
-            crypto[1].volume,
-            crypto[1].currentPrice,
-            crypto[1].rsi,
-            crypto[1].mfi
-          );
+          // galaxyCanvasRef.current.setSun(
+          //   crypto[0].replace("KRW-", ""),
+          //   crypto[1].increaseRatio,
+          //   crypto[1].foreColor,
+          //   crypto[1].backColor,
+          //   crypto[1].logoImg,
+          //   crypto[1].volume,
+          //   crypto[1].currentPrice,
+          //   crypto[1].rsi,
+          //   crypto[1].mfi
+          // );
         } else {
           galaxyCanvasRef.current.sun.update({
             increaseRatio: crypto[1].increaseRatio,

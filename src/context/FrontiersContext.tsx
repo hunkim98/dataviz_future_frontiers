@@ -13,7 +13,7 @@ export interface FrontierTimeSeriesData {
 export interface FrontierData {
   name: string;
   frontier: string;
-  buzzIndex: number;
+  buzz: number;
   type: string;
   now: string;
   2025: string;
@@ -24,13 +24,25 @@ export interface FrontierData {
   sources: string; // separated by comma
   urls: string[]; //starting from index 12
   // last index is 19
+  color: string;
 }
+
+export const ExampleColorPallet = [
+  "#9b5fe0",
+  "#16a4d8",
+  "#60dbe8",
+  "#8bd346",
+  "#efdf48",
+  "#f9a52c",
+  "#d64e12",
+];
 
 interface FrontiersContextElements {
   frontiers: Map<string, FrontierData[]>;
   currentFrontier: {
     title: string;
     data: FrontierData[];
+    avgBuzz: number;
   } | null;
   changeFrontier: (frontierName: string) => void;
 }
@@ -46,22 +58,49 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
   const [currentFrontier, setCurrentFrontier] = useState<{
     title: string;
     data: FrontierData[];
+    avgBuzz: number;
   } | null>(null);
   const changeFrontier = (frontierName: string) => {
     const data = frontiers.get(frontierName);
     if (data) {
-      setCurrentFrontier({ title: frontierName, data });
+      console.log(
+        "from frontier",
+        data.reduce((acc, curr) => {
+          if (curr.buzz) {
+            return acc + Number(curr.buzz);
+          } else {
+            return acc;
+          }
+        }, 0) / data.length
+      );
+      setCurrentFrontier({
+        title: frontierName,
+        data,
+        avgBuzz:
+          data.reduce((acc, curr) => {
+            if (curr.buzz) {
+              return acc + curr.buzz;
+            } else {
+              return acc;
+            }
+          }, 0) / data.length,
+      });
     }
   };
   useEffect(() => {
     GetData("frontiers.csv").then((res) => {
       const frontierSet = new Set<string>();
       const frontierData: FrontierData[] = [];
+      let frontiersCount = 0;
+
       for (let i = 1; i < res.data.length; i++) {
         const row = res.data[i] as any;
         const name = row[0];
         const frontier = row[1];
-        const buzzIndex = row[2];
+        if (!frontierSet.has(frontier)) {
+          frontiersCount++;
+        }
+        const buzz = row[2];
         const type = row[3];
         const now = row[4];
         const _2025 = row[5];
@@ -74,7 +113,7 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
         const data: FrontierData = {
           name,
           frontier,
-          buzzIndex,
+          buzz: Number(buzz.replace(/,/g, "")),
           type,
           now,
           "2025": _2025,
@@ -84,6 +123,7 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
           beyond,
           sources,
           urls,
+          color: ExampleColorPallet[frontiersCount % ExampleColorPallet.length],
         };
         if (frontier) {
           frontierSet.add(frontier);
@@ -96,9 +136,19 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
 
       ) {
         const filtered = frontierData.filter((d) => d.frontier === val);
+        const avgBuzz = filtered.reduce((acc, curr) => {
+          if (curr.buzz) {
+            return acc + curr.buzz;
+          } else {
+            return acc;
+          }
+        }, 0);
         setFrontiers((prev) => {
           const newMap = new Map(prev);
-          newMap.set(val, filtered);
+          newMap.set(
+            val,
+            filtered.map((d) => ({ ...d, avgBuzz }))
+          );
           return newMap;
         });
       }
@@ -112,6 +162,13 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
       setCurrentFrontier({
         title: firstFrontier[0].frontier,
         data: firstFrontier,
+        avgBuzz: firstFrontier.reduce((acc: any, curr: any) => {
+          if (curr.buzz) {
+            return acc + curr.buzz;
+          } else {
+            return acc;
+          }
+        }, 0),
       });
     }
     // setCurrentFrontier(frontiers)

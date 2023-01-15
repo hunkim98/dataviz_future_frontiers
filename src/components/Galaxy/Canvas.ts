@@ -338,31 +338,31 @@ export class GalaxyCanvas {
     this.ctx.restore();
   }
 
-  setSun(
-    name: string,
-    increaseRatio: number,
-    foreColor: string,
-    backColor: string,
-    logoImg: string,
-    volume: number,
-    price: number,
-    rsi: number,
-    mfi: number
-  ) {
-    this.sun = new Sun(
-      this.element,
-      name,
-      increaseRatio,
-      foreColor,
-      backColor,
-      this.dpr,
-      logoImg,
-      volume,
-      price,
-      rsi,
-      mfi
-    );
-  }
+  // setSun(
+  //   name: string,
+  //   increaseRatio: number,
+  //   foreColor: string,
+  //   backColor: string,
+  //   logoImg: string,
+  //   volume: number,
+  //   price: number,
+  //   rsi: number,
+  //   mfi: number
+  // ) {
+  //   this.sun = new Sun(
+  //     this.element,
+  //     name,
+  //     increaseRatio,
+  //     foreColor,
+  //     backColor,
+  //     this.dpr,
+  //     logoImg,
+  //     volume,
+  //     price,
+  //     rsi,
+  //     mfi
+  //   );
+  // }
 
   addPlanet(
     name: string,

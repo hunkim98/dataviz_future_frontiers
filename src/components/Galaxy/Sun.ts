@@ -22,6 +22,7 @@ export class Sun {
   rsi: number;
   canvasDrawPosition: Vector2;
   mfi: number;
+  avgBuzzFeed: number = 0;
   constructor(
     canvas: HTMLCanvasElement,
     name: string,
@@ -33,7 +34,8 @@ export class Sun {
     volume: number,
     price: number,
     rsi: number,
-    mfi: number
+    mfi: number,
+    avgBuzzFeed: number
   ) {
     const logoImage = new Image();
     this.rsi = rsi;
@@ -54,6 +56,7 @@ export class Sun {
     );
     this.mfi = mfi;
     this.setBrightness(increaseRatio);
+    this.avgBuzzFeed = avgBuzzFeed;
   }
 
   setBrightness(increaseRatio: number) {

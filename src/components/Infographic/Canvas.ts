@@ -280,7 +280,13 @@ export class InfographicCanvas {
     this.ctx.restore();
   }
 
-  setSun(name: string, foreColor: string, backColor: string, time: string) {
+  setSun(
+    name: string,
+    foreColor: string,
+    backColor: string,
+    time: string,
+    avgBuzz: number
+  ) {
     if (!this.sun) {
       this.sun = new Sun(
         this.element,
@@ -288,11 +294,14 @@ export class InfographicCanvas {
         time,
         foreColor,
         backColor,
+        avgBuzz,
+
         this.dpr
       );
     } else {
-      this.sun.update({ name, time });
+      this.sun.update({ name, time, avgBuzz });
     }
+    console.log(avgBuzz, "hi");
   }
 
   setPlanet(
@@ -302,15 +311,15 @@ export class InfographicCanvas {
     // first initialize
     this.planets = frontierDataList.map((frontierData, index) => {
       const name = frontierData.name;
-      const buzzIndex = frontierData.buzzIndex;
+      const buzzIndex = frontierData.buzz;
       const type = frontierData.type;
       const sources = frontierData.sources;
       const urls = frontierData.urls;
       const maxBuzzIndex = frontierDataList
-        .map((data) => data.buzzIndex)
+        .map((data) => data.buzz)
         .sort((a, b) => b - a)[0];
       const minBuzzIndex = frontierDataList
-        .map((data) => data.buzzIndex)
+        .map((data) => data.buzz)
         .sort((a, b) => a - b)[0];
 
       const content = frontierData[time];
@@ -319,7 +328,7 @@ export class InfographicCanvas {
         50,
         name,
         content,
-        "#ddd",
+        frontierData.color,
         "#aaa",
         maxBuzzIndex,
         minBuzzIndex,
