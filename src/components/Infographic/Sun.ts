@@ -109,6 +109,7 @@ export class Sun {
       this.position,
       this.dpr
     );
+    this.canvasDrawPosition = drawPosition;
     this.drawBrightnessInner(drawPosition, ctx);
     this.drawBrightnessOuter(drawPosition, ctx);
     this.drawSun(drawPosition, ctx);
@@ -126,7 +127,11 @@ export class Sun {
     );
     let lastYLocation = 0;
     wrappedText.forEach((line, index) => {
-      ctx.fillText(String(line[0]), line[1] as number, line[2] as number);
+      ctx.fillText(
+        String(line[0]).trim(),
+        line[1] as number,
+        line[2] as number
+      );
       lastYLocation = line[2] as number;
     });
 

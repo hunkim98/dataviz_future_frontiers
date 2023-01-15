@@ -18,84 +18,49 @@ export class Planet {
   radius: number;
   position: Vector2;
   speed: number;
-  increaseRatio: number;
   distanceFromSun: number;
-  correlationCoefficient: number;
   spaceShips: Array<Spaceship>;
   ctx: CanvasRenderingContext2D;
-  price: number;
-  support: Array<number>;
-  resistance: Array<number>;
   greenness: number | null = null;
-  spaceShipCount: number;
-  spaceShipDirection: SpaceshipDirection;
-  spaceShipRegenerationInterval: number;
-  currentPriceRelativeLocation: number = 0.5;
-  finalResistancePrice: number | null = null;
-  finalSupportPrice: number | null = null;
+  spaceShipDirection = SpaceshipDirection.IN;
+  //   spaceShipCount: number;
+  //   spaceShipDirection: SpaceshipDirection;
+  //   spaceShipRegenerationInterval: number;
   foreColor: string;
   // iceAgeImage: HTMLImageElement;
   backColor: string;
-  rsi: number;
-  dpr: number;
   isPopupOpen: boolean = false;
+  content: string;
   canvasDrawPosition: Vector2;
-  logoImage: HTMLImageElement;
-  volume: number;
-  mfi: number;
+  dpr: number;
+  maxBuzzIndex: number;
+  minBuzzIndex: number;
   constructor(
     canvas: HTMLCanvasElement,
-    correlationCoefficient: number,
-    increaseRatio: number,
     radius: number,
     name: string,
-    price: number,
-    support: Array<number>,
-    resistance: Array<number>,
-    rsi: number,
+    content: string,
     foreColor: string,
     backColor: string,
-    dpr: number,
-    logoImg: string,
+    maxBuzzIndex: number,
+    minBuzzIndex: number,
     angleTiltRatio: number,
-    volume: number,
-    mfi: number
+    dpr: number
   ) {
-    this.mfi = mfi;
-    const logoImage = new Image();
-    this.volume = volume;
-    this.logoImage = logoImage;
-    logoImage.src = logoImg;
     this.name = name;
+    this.maxBuzzIndex = maxBuzzIndex;
+    this.minBuzzIndex = minBuzzIndex;
+    this.content = content;
     this.foreColor = foreColor;
     this.backColor = backColor;
     this.canvas = canvas;
     this.rotator = new Rotator2D(angleTiltRatio * 360);
-    this.correlationCoefficient = correlationCoefficient;
     this.radius = radius;
     this.spaceShips = [];
     this.ctx = this.canvas.getContext("2d")!;
-    this.price = price;
+    this.distanceFromSun = 300;
+    this.speed = 0.1;
     this.dpr = dpr;
-    this.distanceFromSun = this.calcDistanceFromSun(correlationCoefficient);
-
-    // const image = new Image();
-    // this.iceAgeImage = image;
-
-    this.resistance = resistance;
-    this.support = support;
-
-    this.increaseRatio = increaseRatio;
-    this.speed = this.calcSpeed(increaseRatio);
-    this.rsi = rsi;
-    const {
-      spaceShipCount,
-      spaceShipDirection,
-      spaceShipRegenerationInterval,
-    } = this.setSpaceshipInformation(rsi);
-    this.spaceShipCount = spaceShipCount;
-    this.spaceShipDirection = spaceShipDirection;
-    this.spaceShipRegenerationInterval = spaceShipRegenerationInterval;
 
     const positionAffineVector = new Vector2(this.distanceFromSun, 0).toAffine(
       true
@@ -110,118 +75,10 @@ export class Planet {
       this.position,
       this.dpr
     );
-
-    if (support.length === 0 && resistance.length === 0) {
-      this.greenness = 0;
-      this.currentPriceRelativeLocation = 0.5;
-    } else if (support.length === 0 && resistance.length !== 0) {
-      this.greenness = 30;
-      this.currentPriceRelativeLocation = 0;
-      this.finalResistancePrice = resistance[resistance.length - 1];
-    } else if (support.length !== 0 && resistance.length === 0) {
-      this.greenness = 255;
-      this.currentPriceRelativeLocation = 1;
-      this.finalSupportPrice = support[support.length - 1];
-    } else {
-      let finalSupportPrice = support[support.length - 1];
-      let finalResistancePrice = resistance[resistance.length - 1];
-      while (price > finalResistancePrice && resistance.length > 0) {
-        resistance.pop();
-        finalResistancePrice = resistance[resistance.length - 1];
-        this.finalResistancePrice = resistance[resistance.length - 1];
-      }
-      while (price < finalSupportPrice && support.length > 0) {
-        support.pop();
-        finalSupportPrice = support[support.length - 1];
-        this.finalSupportPrice = support[support.length - 1];
-      }
-      if (resistance.length === 0) {
-        this.greenness = 255;
-        this.currentPriceRelativeLocation = 1;
-      }
-      if (support.length === 0) {
-        this.greenness = 10;
-        this.currentPriceRelativeLocation = 0;
-      }
-
-      if (support.length !== 0 && resistance.length !== 0) {
-        this.greenness = changeRelativeValueToRealValue(
-          price,
-          finalSupportPrice,
-          finalResistancePrice,
-
-          10,
-          255
-        );
-        this.currentPriceRelativeLocation = changeRelativeValueToRealValue(
-          price,
-          finalSupportPrice,
-          finalResistancePrice,
-          0,
-          1
-        );
-      }
-    }
-    setInterval(() => {
-      if (this.spaceShips.length === 0) {
-        while (this.spaceShips.length < this.spaceShipCount) {
-          setTimeout(() => {
-            this.setSpaceShip();
-          }, this.spaceShipRegenerationInterval);
-          this.setSpaceShip();
-        }
-        // console.log(this.name, this.spaceShips.length);
-
-        // console.log(this.name, this.spaceShips.length, "setting finished");
-      }
-    }, spaceShipRegenerationInterval);
     // this.setSpaceShip();
   }
 
-  calcCurrentPriceRelativeLocation(price: number) {
-    if (this.finalSupportPrice === null || this.finalResistancePrice === null) {
-      return this.currentPriceRelativeLocation;
-    }
-    const relativeLocation = changeRelativeValueToRealValue(
-      price,
-      this.finalSupportPrice,
-      this.finalResistancePrice,
-      0,
-      1
-    );
-    return relativeLocation;
-  }
-
-  update(data: Partial<CryptoDataFields>) {
-    if (data.coefficient) {
-      this.correlationCoefficient = data.coefficient;
-      this.distanceFromSun = this.calcDistanceFromSun(data.coefficient);
-    }
-    if (data.increaseRatio) {
-      this.increaseRatio = data.increaseRatio;
-      this.speed = this.calcSpeed(data.increaseRatio);
-    }
-    if (data.currentPrice) {
-      this.price = data.currentPrice;
-      this.currentPriceRelativeLocation = this.calcCurrentPriceRelativeLocation(
-        data.currentPrice
-      );
-    }
-    if (data.rsi) {
-      this.rsi = data.rsi;
-      const {
-        spaceShipDirection,
-        spaceShipCount,
-        spaceShipRegenerationInterval,
-      } = this.setSpaceshipInformation(data.rsi);
-      this.spaceShipCount = spaceShipCount;
-      this.spaceShipRegenerationInterval = spaceShipRegenerationInterval;
-      this.spaceShipDirection = spaceShipDirection;
-    }
-    if (data.mfi) {
-      this.mfi = data.mfi;
-    }
-  }
+  update(data: Partial<CryptoDataFields>) {}
 
   setSpaceshipInformation(rsi: number) {
     let spaceShipCount = 0;
@@ -355,7 +212,7 @@ export class Planet {
   }
   setSpaceShip() {
     const { edgePosition, edgeRotator } = this.getCanvasOuterTrajectoryPoint();
-    if (this.spaceShips.length < this.spaceShipCount) {
+    if (this.spaceShips.length < 3) {
       this.spaceShips.push(
         new Spaceship(
           this.canvas,
@@ -406,122 +263,13 @@ export class Planet {
     this.ctx.restore();
   }
 
-  drawIceAge(origin: Vector2) {
-    this.ctx.save();
-    this.ctx.beginPath();
-    this.ctx.arc(origin.x, origin.y, this.radius, 0, 2 * Math.PI, false);
-    this.ctx.closePath();
-    this.ctx.clip();
-
-    // const imageSize = this.radius * 2 * 1.2;
-    // this.ctx.globalAlpha = 0.8;
-    // this.ctx.drawImage(
-    //   this.iceAgeImage,
-    //   origin.x - imageSize / 2,
-    //   origin.y - imageSize / 2,
-    //   imageSize,
-    //   imageSize
-    // );
-    // this.ctx.save();
-    const iceInnerRadius =
-      //  this.radius * 0.6;
-      this.radius *
-      changeRelativeValueToRealValueInversed(this.mfi, 0, 100, 0, 0.9);
-    const glacierRadius =
-      //  this.radius * 0.8;
-      this.radius *
-      changeRelativeValueToRealValueInversed(this.mfi, 0, 100, 0, 1.1);
-    const northPolePosition = new Vector2(
-      origin.x,
-      origin.y - this.radius * 1.5
-    );
-    const southPolePosition = new Vector2(
-      origin.x,
-      origin.y + this.radius * 1.5
-    );
-    const gradientUpper = this.ctx.createRadialGradient(
-      northPolePosition.x,
-      northPolePosition.y,
-      iceInnerRadius,
-      northPolePosition.x,
-      northPolePosition.y,
-      glacierRadius
-    );
-    const gradientLower = this.ctx.createRadialGradient(
-      southPolePosition.x,
-      southPolePosition.y,
-      iceInnerRadius,
-      southPolePosition.x,
-      southPolePosition.y,
-      glacierRadius
-    );
-
-    // Add three color stops
-    gradientUpper.addColorStop(0, "rgba(255,255,255,1)");
-    gradientUpper.addColorStop(1, "rgba(255,255,255,0)");
-    gradientLower.addColorStop(0, "rgba(255,255,255,1)");
-    gradientLower.addColorStop(1, "rgba(255,255,255,0)");
-    this.ctx.beginPath();
-    this.ctx.arc(
-      origin.x,
-      origin.y - glacierRadius,
-      this.radius * 1.3,
-      0,
-      2 * Math.PI,
-      false
-    );
-    this.ctx.fillStyle = gradientUpper;
-    this.ctx.fill();
-    this.ctx.closePath();
-    this.ctx.beginPath();
-    this.ctx.arc(
-      origin.x,
-      origin.y + glacierRadius,
-      this.radius * 1.3,
-      0,
-      2 * Math.PI,
-      false
-    );
-    this.ctx.fillStyle = gradientLower;
-    this.ctx.fill();
-    this.ctx.closePath();
-
-    this.ctx.beginPath();
-    this.ctx.arc(origin.x, origin.y, this.radius, 0, 2 * Math.PI, false);
-    this.ctx.closePath();
-    this.ctx.fillStyle = `rgba(255,255,255,${changeRelativeValueToRealValueInversed(
-      this.rsi,
-      0,
-      100,
-      0,
-      0.2
-    )})`;
-    this.ctx.fill();
-    // this.ctx.restore();
-    this.ctx.restore();
-  }
-
-  drawLogo(drawPosition: Vector2) {
-    this.ctx.save();
-    const imageSize = this.radius;
-    this.ctx.globalAlpha = 1;
-    this.ctx.drawImage(
-      this.logoImage,
-      drawPosition.x - imageSize / 2,
-      drawPosition.y - imageSize / 2,
-      imageSize,
-      imageSize
-    );
-    this.ctx.restore();
-  }
-
   drawOverlay(drawPosition: Vector2) {
     this.ctx.save();
     this.ctx.beginPath();
     this.ctx.arc(drawPosition.x, drawPosition.y, this.radius, 0, 2 * Math.PI);
 
     this.ctx.fillStyle = `rgba(255, 255, 255, ${changeRelativeValueToRealValueInversed(
-      this.currentPriceRelativeLocation,
+      0.6,
       0,
       1,
       0,
@@ -547,7 +295,6 @@ export class Planet {
       this.position,
       this.dpr
     );
-
     this.ctx.save();
     this.ctx.beginPath();
     this.ctx.arc(
@@ -561,57 +308,15 @@ export class Planet {
     this.ctx.fillStyle = `rgba(0, 55, 186, 1)`;
     this.ctx.fill();
     this.ctx.closePath();
-    this.ctx.beginPath();
-    this.ctx.arc(
-      this.canvasDrawPosition.x,
-      this.canvasDrawPosition.y,
-      this.radius,
-      0,
-      2 * Math.PI,
-      false
-    );
-    this.ctx.fillStyle = `rgba(255, 255, 255, ${changeRelativeValueToRealValueInversed(
-      this.rsi,
-      0,
-      100,
-      0,
-      0.5
-    )})`;
-    this.ctx.fill();
-    this.ctx.closePath();
-
-    //redness
-    this.ctx.beginPath();
-    this.ctx.arc(
-      this.canvasDrawPosition.x,
-      this.canvasDrawPosition.y,
-      this.radius,
-      0,
-      2 * Math.PI,
-      false
-    );
-    this.ctx.fillStyle = `rgba(30, 0, 0, ${changeRelativeValueToRealValue(
-      this.rsi,
-      0,
-      100,
-      0,
-      0.5
-    )})`;
-    this.ctx.fill();
-    this.ctx.closePath();
-    //redness
-    // this.ctx.fillStyle = `rgba(${
-    //   this.greenness ? 255 - this.greenness : 0
-    // }, ${0}, ${this.greenness ?? 0}, ${1})`;
     this.ctx.restore();
 
-    // this.drawOverlay(this.canvasDrawPosition);
+    this.drawOverlay(this.canvasDrawPosition);
 
     this.ctx.save();
 
     this.ctx.textAlign = "center";
     this.ctx.textBaseline = "middle";
-    this.ctx.fillStyle = `rgba(255, 255, 255, 0.8)`;
+    // this.ctx.fillStyle = `rgba(255, 255, 255, 0.8)`;
     this.ctx.font = "12px Righteous";
     this.ctx.fillText(
       this.name,
@@ -625,8 +330,6 @@ export class Planet {
     // );
 
     this.ctx.restore();
-    this.drawLogo(this.canvasDrawPosition);
-    this.drawIceAge(this.canvasDrawPosition);
   }
   setDpr(dpr: number) {
     this.dpr = dpr;

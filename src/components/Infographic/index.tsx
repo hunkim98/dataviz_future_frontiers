@@ -7,6 +7,7 @@ enum FrontierTime {
   "_2030" = "2030",
   "_2035" = "2035",
   "_2040" = "2040",
+  "beyond" = "beyond",
 }
 const Infographic = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -29,9 +30,13 @@ const Infographic = () => {
           setTime(FrontierTime._2035);
         } else if (time === FrontierTime._2035) {
           setTime(FrontierTime._2040);
+        } else if (time === FrontierTime._2040) {
+          setTime(FrontierTime.beyond);
         }
       } else if (!isDeltaPositive && isDeltaOverFifty) {
-        if (time === FrontierTime._2040) {
+        if (time === FrontierTime.beyond) {
+          setTime(FrontierTime._2040);
+        } else if (time === FrontierTime._2040) {
           setTime(FrontierTime._2035);
         } else if (time === FrontierTime._2035) {
           setTime(FrontierTime._2030);
@@ -39,7 +44,6 @@ const Infographic = () => {
           setTime(FrontierTime._2025);
         }
       }
-      console.log("hihih");
     };
     window.addEventListener("wheel", handleWheel);
     return () => {
@@ -81,6 +85,10 @@ const Infographic = () => {
       currentFrontier.title,
       "#555",
       "#fff",
+      FrontierTime._2025
+    );
+    infographicCanvasRef.current.setPlanet(
+      currentFrontier.data,
       FrontierTime._2025
     );
   }, [currentFrontier]);

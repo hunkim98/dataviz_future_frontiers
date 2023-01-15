@@ -128,17 +128,17 @@ export class Spaceship {
       `rgba(255, 255, 255, 0)`
     );
 
-    if (this.planet.rsi >= 70) {
-      grad.addColorStop(
-        this.direction === SpaceshipDirection.IN ? 1 : 0,
-        `rgba(255, 255, 77, 1)`
-      );
-    } else {
-      grad.addColorStop(
-        this.direction === SpaceshipDirection.IN ? 1 : 0,
-        `rgba(255, 255, 255, ${trajectoryOpacity})`
-      );
-    }
+    // if (this.planet.rsi >= 70) {
+    //   grad.addColorStop(
+    //     this.direction === SpaceshipDirection.IN ? 1 : 0,
+    //     `rgba(255, 255, 77, 1)`
+    //   );
+    // } else {
+    //   grad.addColorStop(
+    //     this.direction === SpaceshipDirection.IN ? 1 : 0,
+    //     `rgba(255, 255, 255, ${trajectoryOpacity})`
+    //   );
+    // }
     this.ctx.beginPath();
     this.ctx.moveTo(linePointingSpaceship.x, linePointingSpaceship.y);
     this.ctx.lineTo(trailingPoint.x, trailingPoint.y);

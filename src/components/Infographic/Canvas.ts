@@ -1,4 +1,5 @@
 import { Language } from "context/CryptoContext";
+import { FrontierData } from "context/FrontiersContext";
 import { convertCartesianToScreenPoint } from "utils/cartesian";
 import {
   changeRelativeValueToRealValue,
@@ -192,11 +193,11 @@ export class InfographicCanvas {
         correlationYPos + rectPadding
       );
       this.ctx.font = "bold 14px Noto Sans KR";
-      this.ctx.fillText(
-        (component as Planet).correlationCoefficient.toFixed(5),
-        topLeftPoint.x + popupPadding,
-        correlationYPos + rectPadding + 15
-      );
+      // this.ctx.fillText(
+      //   (component as Planet).correlationCoefficient.toFixed(5),
+      //   topLeftPoint.x + popupPadding,
+      //   correlationYPos + rectPadding + 15
+      // );
     }
 
     const relativeStrengthYPos = correlationYPos + rectHeight;
@@ -292,6 +293,40 @@ export class InfographicCanvas {
     } else {
       this.sun.update({ name, time });
     }
+  }
+
+  setPlanet(
+    frontierDataList: Array<FrontierData>,
+    time: "2025" | "2030" | "2040" | "2050" | "beyond"
+  ) {
+    // first initialize
+    this.planets = frontierDataList.map((frontierData, index) => {
+      const name = frontierData.name;
+      const buzzIndex = frontierData.buzzIndex;
+      const type = frontierData.type;
+      const sources = frontierData.sources;
+      const urls = frontierData.urls;
+      const maxBuzzIndex = frontierDataList
+        .map((data) => data.buzzIndex)
+        .sort((a, b) => b - a)[0];
+      const minBuzzIndex = frontierDataList
+        .map((data) => data.buzzIndex)
+        .sort((a, b) => a - b)[0];
+
+      const content = frontierData[time];
+      return new Planet(
+        this.element,
+        50,
+        name,
+        content,
+        "#ddd",
+        "#aaa",
+        maxBuzzIndex,
+        minBuzzIndex,
+        index / frontierDataList.length,
+        this.dpr
+      );
+    });
   }
 
   addPlanet(
