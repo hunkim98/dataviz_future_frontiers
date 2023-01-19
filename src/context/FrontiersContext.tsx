@@ -63,16 +63,6 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
   const changeFrontier = (frontierName: string) => {
     const data = frontiers.get(frontierName);
     if (data) {
-      console.log(
-        "from frontier",
-        data.reduce((acc, curr) => {
-          if (curr.buzz) {
-            return acc + Number(curr.buzz);
-          } else {
-            return acc;
-          }
-        }, 0)
-      );
       setCurrentFrontier({
         title: frontierName,
         data,

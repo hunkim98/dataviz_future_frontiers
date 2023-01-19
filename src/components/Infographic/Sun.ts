@@ -122,23 +122,26 @@ export class Sun {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     // ctx.fillStyle = `rgba(255, 255, 255, 0.8)`;
-    ctx.font = "35px Righteous";
+    const fontSize = 35;
+    const lineHeight = 35;
+    ctx.font = `${fontSize}px Righteous`;
     const wrappedText = wrapText(
       ctx,
       this.name,
       drawPosition.x,
       drawPosition.y,
       200,
-      35
+      lineHeight
     );
     let lastYLocation = 0;
     wrappedText.forEach((line, index) => {
       ctx.fillText(
         String(line[0]).trim(),
         line[1] as number,
-        line[2] as number
+        (line[2] as number) - (wrappedText.length - 1) * (fontSize / 2)
       );
-      lastYLocation = line[2] as number;
+      lastYLocation = ((line[2] as number) -
+        (wrappedText.length - 1) * (fontSize / 2)) as number;
     });
 
     ctx.save();

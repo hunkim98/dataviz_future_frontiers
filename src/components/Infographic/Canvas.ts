@@ -7,6 +7,7 @@ import {
 } from "utils/clamp";
 import { drawRoundRect } from "utils/drawShape";
 import { Vector2 } from "utils/math/Vector2";
+import { wrapText } from "utils/text";
 import { Planet } from "./Planet";
 import { Sun } from "./Sun";
 
@@ -132,116 +133,11 @@ export class InfographicCanvas {
     } else if (quadrant === 0b10) {
       topLeftPoint = topLeftPoint.add(new Vector2(0, -popupHeight));
     }
-    this.ctx.save();
-    drawRoundRect(
-      this.ctx,
-      quadrant % 2 === 0
-        ? drawPosition.add(new Vector2(borderRadius, 0))
-        : drawPosition.subtract(new Vector2(borderRadius, 0)),
-      drawPosition,
-      borderRadius,
-      width,
-      height
-    );
-    // this.ctx.stroke();
-    this.ctx.fillStyle = component.foreColor;
-    this.ctx.fill();
-    this.ctx.textAlign = "start";
-    this.ctx.textBaseline = "top";
-    this.ctx.fillStyle = "black";
 
-    // this.ctx.font = "12px Noto Sans KR";
-    this.ctx.font = "bold 20px Anek Devanagari";
-    this.ctx.fillStyle = "white";
-
-    const titleYPos = topLeftPoint.y + popupPadding + 5;
-    this.ctx.fillText(component.name, topLeftPoint.x + popupPadding, titleYPos);
-
-    this.ctx.textAlign = "start";
-    this.ctx.font = "normal 10px Noto Sans KR";
-    //correlation to btc
-    const marketCapYPos = titleYPos + 20 + 2;
-
-    this.ctx.fillStyle = "black";
-
-    this.ctx.save();
-    this.ctx.fillStyle = dataIndex % 2 === 0 ? "#D9D9D9" : "#BCBCBC";
-    dataIndex++;
-    this.ctx.fillRect(topLeftPoint.x, marketCapYPos, popupWidth, rectHeight);
-    this.ctx.restore();
-
-    let correlationYPos = marketCapYPos;
-    //correlation to btc
-    if (!isSunHovered) {
-      correlationYPos = correlationYPos + rectHeight;
-      this.ctx.save();
-      this.ctx.fillStyle = dataIndex % 2 === 0 ? "#D9D9D9" : "#BCBCBC";
-      dataIndex++;
-      this.ctx.fillRect(
-        topLeftPoint.x,
-        correlationYPos,
-        popupWidth,
-        rectHeight
-      );
-      this.ctx.restore();
-      this.ctx.font = "normal 10px Noto Sans KR";
-      this.ctx.fillText(
-        this.language === Language.ENGLISH
-          ? "Correlation to BTC (Distance from Sun)"
-          : "BTC와의 가격 변동 유사성 (태양과의 거리)",
-        topLeftPoint.x + popupPadding,
-        correlationYPos + rectPadding
-      );
-      this.ctx.font = "bold 14px Noto Sans KR";
-      // this.ctx.fillText(
-      //   (component as Planet).correlationCoefficient.toFixed(5),
-      //   topLeftPoint.x + popupPadding,
-      //   correlationYPos + rectPadding + 15
-      // );
+    if (!this.hoveredPlanet?.content) {
+      return;
     }
-
-    const relativeStrengthYPos = correlationYPos + rectHeight;
     this.ctx.save();
-    this.ctx.fillStyle = dataIndex % 2 === 0 ? "#D9D9D9" : "#BCBCBC";
-    dataIndex++;
-    this.ctx.fillRect(
-      topLeftPoint.x,
-      relativeStrengthYPos,
-      popupWidth,
-      rectHeight
-    );
-    this.ctx.restore();
-    //Moving average
-    this.ctx.font = "normal 10px Noto Sans KR";
-    const rsiText =
-      this.language === Language.ENGLISH
-        ? "Relative Strength Index (Spaceship in/out)"
-        : "RSI 과매수 정도 (우주선 유입/출입)";
-    this.ctx.fillText(
-      isSunHovered ? rsiText.split("(")[0] : rsiText,
-      topLeftPoint.x + popupPadding,
-      relativeStrengthYPos + rectPadding
-    );
-
-    const mfiYPos = relativeStrengthYPos + rectHeight;
-    this.ctx.save();
-    this.ctx.fillStyle = dataIndex % 2 === 0 ? "#D9D9D9" : "#BCBCBC";
-    dataIndex++;
-    this.ctx.fillRect(topLeftPoint.x, mfiYPos, popupWidth, rectHeight);
-    this.ctx.restore();
-
-    this.ctx.font = "normal 10px Noto Sans KR";
-    const mfiText =
-      this.language === Language.ENGLISH
-        ? "Money Flow Index (Planet Ice Age)"
-        : "MFI 과매수 정도 (행성 빙하기 정도)";
-    this.ctx.fillText(
-      isSunHovered ? mfiText.split("(")[0] : mfiText,
-      topLeftPoint.x + popupPadding,
-      mfiYPos + rectPadding
-    );
-
-    //clip
     drawRoundRect(
       this.ctx,
       quadrant % 2 === 0
@@ -252,32 +148,179 @@ export class InfographicCanvas {
       width,
       height
     );
-    this.ctx.clip();
+    this.ctx.fillStyle = `rgba(255,255,255, 0.95)`;
+    this.ctx.fill();
+    this.ctx.stroke();
+    this.ctx.restore();
 
-    const increaseRatioYPos = mfiYPos + rectHeight;
+    if (!this.hoveredPlanet || !this.sun) {
+      return;
+    }
     this.ctx.save();
-    this.ctx.fillStyle = dataIndex % 2 === 0 ? "#D9D9D9" : "#BCBCBC";
-    dataIndex++;
-    this.ctx.fillRect(
-      topLeftPoint.x,
-      increaseRatioYPos,
-      popupWidth,
-      rectHeight
-    );
-    this.ctx.restore();
 
-    this.ctx.font = "normal 10px Noto Sans KR";
-    const increaseRatioText =
-      this.language === Language.ENGLISH
-        ? "MA Increase Rate (Orbit Speed)"
-        : "가격 이동평균선 증가율 (행성 공전속도)";
+    this.ctx.textAlign = "start";
     this.ctx.fillText(
-      isSunHovered ? increaseRatioText.split("(")[0] : increaseRatioText,
-      topLeftPoint.x + popupPadding,
-      increaseRatioYPos + rectPadding
+      this.sun.time !== "beyond" ? "In " + this.sun.time : "Beyond...",
+      topLeftPoint.x,
+      topLeftPoint.y + 20
     );
 
+    this.ctx.font = "15px normal Noto Sans KR";
+
+    const wrappedText = wrapText(
+      this.ctx,
+      this.hoveredPlanet.content,
+      topLeftPoint.x + 5,
+      topLeftPoint.y + 15,
+      150,
+      20
+    );
+
+    wrappedText.forEach((item) => {
+      this.ctx.fillText(
+        String(item[0]).trim(),
+        item[1] as number,
+        (item[2] as number) + 20
+        // lineHeightOffset
+      );
+    });
+
     this.ctx.restore();
+
+    // this.ctx.fillStyle = component.foreColor;
+    // this.ctx.fill();
+    // this.ctx.textAlign = "start";
+    // this.ctx.textBaseline = "top";
+    // this.ctx.fillStyle = "black";
+
+    // // this.ctx.font = "12px Noto Sans KR";
+    // this.ctx.font = "bold 20px Anek Devanagari";
+    // this.ctx.fillStyle = "white";
+
+    // const titleYPos = topLeftPoint.y + popupPadding + 5;
+    // this.ctx.fillText(component.name, topLeftPoint.x + popupPadding, titleYPos);
+
+    // this.ctx.textAlign = "start";
+    // this.ctx.font = "normal 10px Noto Sans KR";
+    // //correlation to btc
+    // const marketCapYPos = titleYPos + 20 + 2;
+
+    // this.ctx.fillStyle = "black";
+
+    // this.ctx.save();
+    // this.ctx.fillStyle = dataIndex % 2 === 0 ? "#D9D9D9" : "#BCBCBC";
+    // dataIndex++;
+    // this.ctx.fillRect(topLeftPoint.x, marketCapYPos, popupWidth, rectHeight);
+    // this.ctx.restore();
+
+    // let correlationYPos = marketCapYPos;
+    // //correlation to btc
+    // if (!isSunHovered) {
+    //   correlationYPos = correlationYPos + rectHeight;
+    //   this.ctx.save();
+    //   this.ctx.fillStyle = dataIndex % 2 === 0 ? "#D9D9D9" : "#BCBCBC";
+    //   dataIndex++;
+    //   this.ctx.fillRect(
+    //     topLeftPoint.x,
+    //     correlationYPos,
+    //     popupWidth,
+    //     rectHeight
+    //   );
+    //   this.ctx.restore();
+    //   this.ctx.font = "normal 10px Noto Sans KR";
+    //   this.ctx.fillText(
+    //     this.language === Language.ENGLISH
+    //       ? "Correlation to BTC (Distance from Sun)"
+    //       : "BTC와의 가격 변동 유사성 (태양과의 거리)",
+    //     topLeftPoint.x + popupPadding,
+    //     correlationYPos + rectPadding
+    //   );
+    //   this.ctx.font = "bold 14px Noto Sans KR";
+    //   // this.ctx.fillText(
+    //   //   (component as Planet).correlationCoefficient.toFixed(5),
+    //   //   topLeftPoint.x + popupPadding,
+    //   //   correlationYPos + rectPadding + 15
+    //   // );
+    // }
+
+    // const relativeStrengthYPos = correlationYPos + rectHeight;
+    // this.ctx.save();
+    // this.ctx.fillStyle = dataIndex % 2 === 0 ? "#D9D9D9" : "#BCBCBC";
+    // dataIndex++;
+    // this.ctx.fillRect(
+    //   topLeftPoint.x,
+    //   relativeStrengthYPos,
+    //   popupWidth,
+    //   rectHeight
+    // );
+    // this.ctx.restore();
+    // //Moving average
+    // this.ctx.font = "normal 10px Noto Sans KR";
+    // const rsiText =
+    //   this.language === Language.ENGLISH
+    //     ? "Relative Strength Index (Spaceship in/out)"
+    //     : "RSI 과매수 정도 (우주선 유입/출입)";
+    // this.ctx.fillText(
+    //   isSunHovered ? rsiText.split("(")[0] : rsiText,
+    //   topLeftPoint.x + popupPadding,
+    //   relativeStrengthYPos + rectPadding
+    // );
+
+    // const mfiYPos = relativeStrengthYPos + rectHeight;
+    // this.ctx.save();
+    // this.ctx.fillStyle = dataIndex % 2 === 0 ? "#D9D9D9" : "#BCBCBC";
+    // dataIndex++;
+    // this.ctx.fillRect(topLeftPoint.x, mfiYPos, popupWidth, rectHeight);
+    // this.ctx.restore();
+
+    // this.ctx.font = "normal 10px Noto Sans KR";
+    // const mfiText =
+    //   this.language === Language.ENGLISH
+    //     ? "Money Flow Index (Planet Ice Age)"
+    //     : "MFI 과매수 정도 (행성 빙하기 정도)";
+    // this.ctx.fillText(
+    //   isSunHovered ? mfiText.split("(")[0] : mfiText,
+    //   topLeftPoint.x + popupPadding,
+    //   mfiYPos + rectPadding
+    // );
+
+    // //clip
+    // drawRoundRect(
+    //   this.ctx,
+    //   quadrant % 2 === 0
+    //     ? drawPosition.add(new Vector2(borderRadius, 0))
+    //     : drawPosition.subtract(new Vector2(borderRadius, 0)),
+    //   drawPosition,
+    //   borderRadius,
+    //   width,
+    //   height
+    // );
+    // this.ctx.clip();
+
+    // const increaseRatioYPos = mfiYPos + rectHeight;
+    // this.ctx.save();
+    // this.ctx.fillStyle = dataIndex % 2 === 0 ? "#D9D9D9" : "#BCBCBC";
+    // dataIndex++;
+    // this.ctx.fillRect(
+    //   topLeftPoint.x,
+    //   increaseRatioYPos,
+    //   popupWidth,
+    //   rectHeight
+    // );
+    // this.ctx.restore();
+
+    // this.ctx.font = "normal 10px Noto Sans KR";
+    // const increaseRatioText =
+    //   this.language === Language.ENGLISH
+    //     ? "MA Increase Rate (Orbit Speed)"
+    //     : "가격 이동평균선 증가율 (행성 공전속도)";
+    // this.ctx.fillText(
+    //   isSunHovered ? increaseRatioText.split("(")[0] : increaseRatioText,
+    //   topLeftPoint.x + popupPadding,
+    //   increaseRatioYPos + rectPadding
+    // );
+
+    // this.ctx.restore();
   }
 
   setSun(
@@ -332,8 +375,22 @@ export class InfographicCanvas {
         maxBuzzIndex,
         minBuzzIndex,
         index / frontierDataList.length,
+        frontierData.buzz,
         this.dpr
       );
+    });
+  }
+
+  updatePlanets(data: { name: string; content: string }[]) {
+    this.planets.forEach((planet) => {
+      const queriedData = data.find((element) => element.name === planet.name);
+      if (queriedData) {
+        console.log("updated");
+        planet.update({
+          title: queriedData.name,
+          content: queriedData.content,
+        });
+      }
     });
   }
 
@@ -407,7 +464,7 @@ export class InfographicCanvas {
         0,
         1
       ),
-      `rgba(0, 15, 45, ${changeRelativeValueToRealValueInversed(
+      `rgba(0, 25, 60, ${changeRelativeValueToRealValueInversed(
         Math.abs(this.loop - this.backgroundLoopMax / 2),
         0,
         this.backgroundLoopMax / 2,
@@ -440,6 +497,7 @@ export class InfographicCanvas {
   };
 
   drawScene() {
+    this.drawBackground();
     this.drawGalaxyComponents();
     if (this.isPopupOpen) {
       if (this.hoveredPlanet) {

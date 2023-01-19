@@ -35,8 +35,10 @@ export class Planet {
   content: string;
   canvasDrawPosition: Vector2;
   dpr: number;
+  buzz: number;
   maxBuzzIndex: number;
   minBuzzIndex: number;
+  sentimentDegree: number;
   constructor(
     canvas: HTMLCanvasElement,
     radius: number,
@@ -47,9 +49,11 @@ export class Planet {
     maxBuzzIndex: number,
     minBuzzIndex: number,
     angleTiltRatio: number,
+    buzz: number,
     dpr: number
   ) {
     this.name = name;
+    this.buzz = buzz;
     this.maxBuzzIndex = maxBuzzIndex;
     this.minBuzzIndex = minBuzzIndex;
     this.content = content;
@@ -57,7 +61,13 @@ export class Planet {
     this.backColor = backColor;
     this.canvas = canvas;
     this.rotator = new Rotator2D(angleTiltRatio * 360);
-    this.radius = radius;
+    this.radius = changeRelativeValueToRealValue(
+      buzz,
+      minBuzzIndex,
+      maxBuzzIndex,
+      60,
+      100
+    );
     this.spaceShips = [];
     this.ctx = this.canvas.getContext("2d")!;
     this.distanceFromSun = 300;
@@ -65,7 +75,7 @@ export class Planet {
     this.dpr = dpr;
 
     const sentiment = new Sentiment();
-    console.log(sentiment.analyze(this.content).score, this.content);
+    this.sentimentDegree = sentiment.analyze(this.content).score;
     const positionAffineVector = new Vector2(this.distanceFromSun, 0).toAffine(
       true
     );
@@ -82,7 +92,13 @@ export class Planet {
     // this.setSpaceShip();
   }
 
-  update(data: Partial<CryptoDataFields>) {}
+  update(data: Partial<{ title: string; time: string; content: string }>) {
+    if (data.content) {
+      this.content = data.content;
+      const sentiment = new Sentiment();
+      this.sentimentDegree = sentiment.analyze(this.content).score;
+    }
+  }
 
   setSpaceshipInformation(rsi: number) {
     let spaceShipCount = 0;
@@ -273,11 +289,11 @@ export class Planet {
     this.ctx.arc(drawPosition.x, drawPosition.y, this.radius, 0, 2 * Math.PI);
 
     this.ctx.fillStyle = `rgba(255, 255, 255, ${changeRelativeValueToRealValueInversed(
-      0.6,
+      this.sentimentDegree,
       0,
-      1,
+      5,
       0,
-      0.3
+      0.5
     )})`;
     this.ctx.fill();
     this.ctx.closePath();
@@ -322,20 +338,30 @@ export class Planet {
     this.ctx.textAlign = "center";
     this.ctx.textBaseline = "middle";
     // this.ctx.fillStyle = `rgba(255, 255, 255, 0.8)`;
-    this.ctx.font = "18px Righteous";
+    const fontSize = 14;
+    const lineHeight = 20;
+    this.ctx.font = `bold ${fontSize}px Noto Sans KR`;
     const wrappedText = wrapText(
       this.ctx,
       this.name,
       this.canvasDrawPosition.x,
       this.canvasDrawPosition.y,
       this.radius,
-      20
+      lineHeight
     );
+
     wrappedText.forEach((item) => {
+      let lineHeightOffset = 0;
+      if (wrappedText.length > 2) {
+        lineHeightOffset = ((lineHeight * 1) / 4) * (wrappedText.length - 2);
+      }
       this.ctx.fillText(
-        item[0] as string,
+        String(item[0]).trim(),
         item[1] as number,
-        item[2] as number
+        (item[2] as number) -
+          (wrappedText.length - 1) * (fontSize / 2) -
+          lineHeightOffset
+        // lineHeightOffset
       );
     });
     // this.ctx.fillText(

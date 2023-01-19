@@ -1,5 +1,6 @@
 import { FrontiersContext } from "context/FrontiersContext";
 import React, { useContext, useEffect, useRef, useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
 import { InfographicCanvas } from "./Canvas";
 
 enum FrontierTime {
@@ -17,9 +18,21 @@ const Infographic = () => {
   const { frontiers, changeFrontier, currentFrontier } =
     useContext(FrontiersContext);
 
+  const notify = (time: string) =>
+    toast(`Timeline set to ${time}`, {
+      icon: "👏",
+      style: {
+        fontFamily: "Roboto",
+        borderRadius: "10px",
+        background: "#333",
+        color: "#fff",
+      },
+    });
+
   const [time, setTime] = useState<FrontierTime>(FrontierTime._2025);
 
   useEffect(() => {
+    notify(time);
     const handleWheel = (event: WheelEvent) => {
       const isDeltaPositive = event.deltaY < 0;
       const isDeltaOverFifty = Math.abs(event.deltaY) > 20;
@@ -59,10 +72,21 @@ const Infographic = () => {
     if (!sun) {
       return;
     }
+    if (time === sun.time) {
+      return;
+    }
     infographicCanvasRef.current.sun!.update({
       time,
     });
-  }, [time]);
+    if (!currentFrontier) {
+      return;
+    }
+    const updatedData = currentFrontier.data.map((frontier) => ({
+      name: frontier.name,
+      content: frontier[time as "2025" | "2030" | "2040" | "2050" | "beyond"],
+    }));
+    infographicCanvasRef.current.updatePlanets(updatedData);
+  }, [time, currentFrontier]);
 
   useEffect(() => {
     if (!canvasRef.current) {
@@ -119,9 +143,11 @@ const Infographic = () => {
         width: "100%",
         height: "100%",
         position: "fixed",
+        backgroundColor: "black",
       }}
       ref={divRef}
     >
+      {/* <Toaster position="bottom-center" /> */}
       <div
         style={{
           position: "absolute",
