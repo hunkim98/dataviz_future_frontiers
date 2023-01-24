@@ -28,13 +28,13 @@ export interface FrontierData {
 }
 
 export const ExampleColorPallet = [
-  "#9b5fe0",
-  "#16a4d8",
-  "#60dbe8",
-  "#8bd346",
-  "#efdf48",
-  "#f9a52c",
-  "#d64e12",
+  "rgb(155,95,224)", //155, 95, 224
+  "rgb(22,164,216)", //22, 164, 216
+  "rgb(96,219,232)", //96, 219, 232
+  "rgb(139,211,70)", //139, 211, 70
+  "rgb(239,223,72)", //239, 223, 72
+  "rgb(249,165,44)", //249, 165, 44
+  "rgb(214,78,18)", //214, 78, 18
 ];
 
 interface FrontiersContextElements {
@@ -42,9 +42,23 @@ interface FrontiersContextElements {
   currentFrontier: {
     title: string;
     data: FrontierData[];
+    avgBuzz: number;
     totalBuzz: number;
+    color: string;
   } | null;
   changeFrontier: (frontierName: string) => void;
+  minMaxAvgBuzz:
+    | {
+        min: number;
+        max: number;
+      }
+    | undefined;
+  minMaxTotalBuzz:
+    | {
+        min: number;
+        max: number;
+      }
+    | undefined;
 }
 
 const FrontiersContext = createContext<FrontiersContextElements>(
@@ -55,17 +69,36 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
   const [frontiers, setFrontiers] = useState<Map<string, FrontierData[]>>(
     new Map()
   );
+  const [minMaxAvgBuzz, setMinMaxAvgBuzz] = useState<{
+    min: number;
+    max: number;
+  }>();
+  const [minMaxTotalBuzz, setMinMaxTotalBuzz] = useState<{
+    min: number;
+    max: number;
+  }>();
   const [currentFrontier, setCurrentFrontier] = useState<{
     title: string;
     data: FrontierData[];
+    avgBuzz: number;
     totalBuzz: number;
+    color: string;
   } | null>(null);
   const changeFrontier = (frontierName: string) => {
     const data = frontiers.get(frontierName);
+
     if (data) {
+      console.log("data", data[0].color);
       setCurrentFrontier({
         title: frontierName,
         data,
+        avgBuzz: data.reduce((acc, curr) => {
+          if (curr.buzz) {
+            return acc + curr.buzz / data.length;
+          } else {
+            return acc;
+          }
+        }, 0),
         totalBuzz: data.reduce((acc, curr) => {
           if (curr.buzz) {
             return acc + curr.buzz;
@@ -73,6 +106,7 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
             return acc;
           }
         }, 0),
+        color: data[0].color,
       });
     }
   };
@@ -119,12 +153,23 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
         }
         frontierData.push(data);
       }
+      let maxAvg = 0;
+      let minAvg = Number.MAX_VALUE;
+      let maxTotalBuzz = 0;
+      let minTotalBuzz = Number.MAX_VALUE;
       for (
         let it = frontierSet.values(), val: string = "";
         (val = it.next().value);
 
       ) {
         const filtered = frontierData.filter((d) => d.frontier === val);
+        const avgBuzz = filtered.reduce((acc, curr) => {
+          if (curr.buzz) {
+            return acc + curr.buzz / filtered.length;
+          } else {
+            return acc;
+          }
+        }, 0);
         const totalBuzz = filtered.reduce((acc, curr) => {
           if (curr.buzz) {
             return acc + curr.buzz;
@@ -132,15 +177,30 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
             return acc;
           }
         }, 0);
+        if (avgBuzz > maxAvg) {
+          maxAvg = avgBuzz;
+        }
+        if (avgBuzz < minAvg) {
+          minAvg = avgBuzz;
+        }
+        if (totalBuzz > maxTotalBuzz) {
+          maxTotalBuzz = totalBuzz;
+        }
+        if (totalBuzz < minTotalBuzz) {
+          minTotalBuzz = totalBuzz;
+        }
+
         setFrontiers((prev) => {
           const newMap = new Map(prev);
           newMap.set(
             val,
-            filtered.map((d) => ({ ...d, avgBuzz: totalBuzz }))
+            filtered.map((d) => ({ ...d, avgBuzz: avgBuzz }))
           );
           return newMap;
         });
       }
+      setMinMaxTotalBuzz({ min: minTotalBuzz, max: maxTotalBuzz });
+      setMinMaxAvgBuzz({ min: minAvg, max: maxAvg });
     });
   }, []);
 
@@ -151,6 +211,13 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
       setCurrentFrontier({
         title: firstFrontier[0].frontier,
         data: firstFrontier,
+        avgBuzz: firstFrontier.reduce((acc: any, curr: any) => {
+          if (curr.buzz) {
+            return acc + curr.buzz / firstFrontier.length;
+          } else {
+            return acc;
+          }
+        }, 0),
         totalBuzz: firstFrontier.reduce((acc: any, curr: any) => {
           if (curr.buzz) {
             return acc + curr.buzz;
@@ -158,6 +225,7 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
             return acc;
           }
         }, 0),
+        color: firstFrontier[0].color,
       });
     }
     // setCurrentFrontier(frontiers)
@@ -165,7 +233,13 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
 
   return (
     <FrontiersContext.Provider
-      value={{ frontiers, currentFrontier, changeFrontier }}
+      value={{
+        frontiers,
+        currentFrontier,
+        changeFrontier,
+        minMaxAvgBuzz,
+        minMaxTotalBuzz,
+      }}
     >
       {children}
     </FrontiersContext.Provider>

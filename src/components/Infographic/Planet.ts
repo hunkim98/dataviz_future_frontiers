@@ -39,9 +39,9 @@ export class Planet {
   maxBuzzIndex: number;
   minBuzzIndex: number;
   sentimentDegree: number;
+  sun: Sun;
   constructor(
     canvas: HTMLCanvasElement,
-    radius: number,
     name: string,
     content: string,
     foreColor: string,
@@ -50,9 +50,11 @@ export class Planet {
     minBuzzIndex: number,
     angleTiltRatio: number,
     buzz: number,
-    dpr: number
+    dpr: number,
+    sun: Sun
   ) {
     this.name = name;
+    this.sun = sun;
     this.buzz = buzz;
     this.maxBuzzIndex = maxBuzzIndex;
     this.minBuzzIndex = minBuzzIndex;
@@ -93,7 +95,7 @@ export class Planet {
   }
 
   update(data: Partial<{ title: string; time: string; content: string }>) {
-    if (data.content) {
+    if (data.content !== undefined) {
       this.content = data.content;
       const sentiment = new Sentiment();
       this.sentimentDegree = sentiment.analyze(this.content).score;
@@ -155,7 +157,7 @@ export class Planet {
   }
 
   calcDistanceFromSun(correlationCoefficient: number) {
-    const minDistance = Sun.radius + 30 + this.radius;
+    const minDistance = this.sun.radius + 30 + this.radius;
     const maxDistance = (this.canvas.height + 260) / this.dpr / 2;
 
     const relativeToRadian = changeRelativeValueToRealValueInversed(
@@ -286,15 +288,22 @@ export class Planet {
   drawOverlay(drawPosition: Vector2) {
     this.ctx.save();
     this.ctx.beginPath();
-    this.ctx.arc(drawPosition.x, drawPosition.y, this.radius, 0, 2 * Math.PI);
 
-    this.ctx.fillStyle = `rgba(255, 255, 255, ${changeRelativeValueToRealValueInversed(
-      this.sentimentDegree,
-      0,
-      5,
-      0,
-      0.5
-    )})`;
+    this.ctx.lineWidth = 0;
+    this.ctx.strokeStyle = "none";
+
+    this.ctx.arc(drawPosition.x, drawPosition.y, this.radius, 0, 2 * Math.PI);
+    if (!this.content) {
+      this.ctx.fillStyle = `rgba(80, 80, 80, 1)`;
+    } else {
+      this.ctx.fillStyle = `rgba(255, 255, 255, ${changeRelativeValueToRealValueInversed(
+        this.sentimentDegree,
+        0,
+        5,
+        0,
+        0.5
+      )})`;
+    }
     this.ctx.fill();
     this.ctx.closePath();
     this.ctx.restore();
@@ -340,7 +349,7 @@ export class Planet {
     // this.ctx.fillStyle = `rgba(255, 255, 255, 0.8)`;
     const fontSize = 14;
     const lineHeight = 20;
-    this.ctx.font = `bold ${fontSize}px Noto Sans KR`;
+    this.ctx.font = `bold ${fontSize}px Questrial`;
     const wrappedText = wrapText(
       this.ctx,
       this.name,

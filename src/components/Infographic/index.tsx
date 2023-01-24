@@ -1,4 +1,4 @@
-import { FrontiersContext } from "context/FrontiersContext";
+import { ExampleColorPallet, FrontiersContext } from "context/FrontiersContext";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { InfographicCanvas } from "./Canvas";
@@ -15,8 +15,13 @@ const Infographic = () => {
   const divRef = useRef<HTMLDivElement>(null);
   const infographicCanvasRef = useRef<InfographicCanvas | null>(null);
 
-  const { frontiers, changeFrontier, currentFrontier } =
-    useContext(FrontiersContext);
+  const {
+    frontiers,
+    changeFrontier,
+    currentFrontier,
+    minMaxAvgBuzz,
+    minMaxTotalBuzz,
+  } = useContext(FrontiersContext);
 
   const notify = (time: string) =>
     toast(`Timeline set to ${time}`, {
@@ -75,8 +80,10 @@ const Infographic = () => {
     if (time === sun.time) {
       return;
     }
+
     infographicCanvasRef.current.sun!.update({
       time,
+      totalBuzz: currentFrontier?.totalBuzz,
     });
     if (!currentFrontier) {
       return;
@@ -105,18 +112,29 @@ const Infographic = () => {
     if (!currentFrontier) {
       return;
     }
+    if (!minMaxAvgBuzz) {
+      return;
+    }
+    if (!minMaxTotalBuzz) {
+      return;
+    }
+    console.log("min", minMaxAvgBuzz.min, "max", minMaxAvgBuzz.max);
+    console.log("avg", currentFrontier.avgBuzz);
     infographicCanvasRef.current.setSun(
       currentFrontier.title,
-      "#555",
+      currentFrontier.color,
       "#fff",
       FrontierTime._2025,
-      currentFrontier.totalBuzz
+      currentFrontier.totalBuzz,
+      minMaxTotalBuzz.min,
+      minMaxTotalBuzz.max
     );
     infographicCanvasRef.current.setPlanet(
       currentFrontier.data,
-      FrontierTime._2025
+      FrontierTime._2025,
+      currentFrontier.totalBuzz
     );
-  }, [currentFrontier]);
+  }, [currentFrontier, minMaxAvgBuzz, minMaxTotalBuzz]);
 
   useEffect(() => {
     const onResize = () => {
@@ -151,23 +169,53 @@ const Infographic = () => {
       <div
         style={{
           position: "absolute",
-          width: "100%",
+          width: "calc(100% - 60px)",
           display: "flex",
           justifyContent: "space-between",
           zIndex: 5,
+          flexWrap: "wrap",
+          marginTop: 20,
+          padding: "0 30px",
         }}
       >
         {frontiers &&
-          Array.from(frontiers.keys()).map((frontier) => {
+          Array.from(frontiers.keys()).map((frontier, index) => {
+            const frontierData = frontiers.get(frontier);
             return (
-              <button
-                key={frontier}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  background: currentFrontier?.title === frontier ? "#555" : "",
+                  borderRadius: 5,
+                  padding: 5,
+                  cursor: "pointer",
+                }}
                 onClick={() => {
                   changeFrontier(frontier);
                 }}
               >
-                {frontier}
-              </button>
+                <div
+                  style={{
+                    width: 15,
+                    height: 15,
+                    backgroundColor: frontierData
+                      ? frontierData[0].color
+                      : "white",
+                  }}
+                ></div>
+                <button
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "white",
+                    cursor: "pointer",
+                  }}
+                  key={frontier}
+                >
+                  {frontier}
+                </button>
+              </div>
             );
           })}
       </div>

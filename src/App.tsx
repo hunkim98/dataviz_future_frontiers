@@ -10,7 +10,8 @@ function App() {
         display: "flex",
         flexDirection: "column",
         minHeight: "100vh",
-        fontFamily: "Righteous",
+        // fontFamily: "Questrial",
+        // fontFamily: "Righteous",
       }}
     >
       {/* <header>

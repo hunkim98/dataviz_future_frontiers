@@ -11,6 +11,8 @@ export class Sun {
   position: Vector2 = new Vector2(0, 0);
   MIN_BRIGHTNESS = 2;
   MAX_BRIGHTNESS = 20;
+  MIN_SIZE = 80;
+  MAX_SIZE = 150;
   increaseRatio: number;
   foreColor: string;
   backColor: string;

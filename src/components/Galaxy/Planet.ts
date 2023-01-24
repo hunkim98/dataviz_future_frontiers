@@ -197,9 +197,6 @@ export class Planet {
           }, this.spaceShipRegenerationInterval);
           this.setSpaceShip();
         }
-        // console.log(this.name, this.spaceShips.length);
-
-        // console.log(this.name, this.spaceShips.length, "setting finished");
       }
     }, spaceShipRegenerationInterval);
     // this.setSpaceShip();

@@ -30,6 +30,11 @@ export class InfographicCanvas {
   hoveredPlanet: Planet | null = null;
   isPopupOpen: boolean = false;
   isSunHovered: boolean = false;
+  currentFrontierColor: { r: number; g: number; b: number } = {
+    r: 0,
+    g: 25,
+    b: 60,
+  };
 
   constructor(element: HTMLCanvasElement) {
     this.language = Language.KOREAN;
@@ -57,7 +62,7 @@ export class InfographicCanvas {
       const distanceToSun = screenPoint.squareDistanceTo(
         new Vector2(e.clientX, e.clientY)
       );
-      if (Math.sqrt(distanceToSun) < Sun.radius) {
+      if (Math.sqrt(distanceToSun) < this.sun.radius) {
         this.isSunHovered = true;
       } else {
         this.isSunHovered = false;
@@ -91,7 +96,24 @@ export class InfographicCanvas {
     }
   }
 
+  drawButton(drawPosition: Vector2) {
+    this.ctx.save();
+    this.ctx.beginPath();
+    this.ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+    this.ctx.arc(drawPosition.x, drawPosition.y, 20, 0, Math.PI * 2);
+    this.ctx.fill();
+    this.ctx.closePath();
+    this.ctx.restore();
+  }
+
   drawPopup(drawPosition: Vector2, component: Planet | Sun) {
+    if (!this.hoveredPlanet?.content) {
+      return;
+    }
+    const wrappedTextMaxWidth = 180;
+    const wrappedTextLineHeight = 20;
+    const wrappedTextFontSize = 15;
+
     const rectPadding = 8;
     const rectHeight = 43;
     const popupPadding = 8;
@@ -121,11 +143,37 @@ export class InfographicCanvas {
     const isSunHovered = component instanceof Sun;
     const borderRadius = 10;
     const popupWidth = 210;
-    const popupHeight = headerHeight + dataCountToShow * rectHeight;
+    let maxHeight = 0;
+    let minHeight = Number.MAX_VALUE;
+    this.ctx.save();
+    let topLeftPoint = new Vector2(drawPosition.x, drawPosition.y);
+    this.ctx.font = `${wrappedTextFontSize}px Questrial`;
+    const mockedWrappedText = wrapText(
+      this.ctx,
+      this.hoveredPlanet.content,
+      topLeftPoint.x + 5,
+      topLeftPoint.y + 23,
+      wrappedTextMaxWidth,
+      wrappedTextLineHeight
+    );
+    mockedWrappedText.forEach((line) => {
+      if (line[2] > maxHeight) {
+        maxHeight = line[2] as number;
+      }
+      if (line[2] < minHeight) {
+        minHeight = line[2] as number;
+      }
+    });
+
+    const popupHeight = headerHeight + maxHeight - minHeight + 27;
+    // mockedWrappedText.length * 10;
+    // -
+    // (mockedWrappedText[2][2] as number);
     //isSunHovered ? 135 : 175;
+    this.ctx.restore();
     const width = quadrant % 2 === 0 ? popupWidth : -popupWidth;
     const height = (quadrant & 0b10) === 0b10 ? -popupHeight : popupHeight;
-    let topLeftPoint = new Vector2(drawPosition.x, drawPosition.y);
+
     if (quadrant === 0b01) {
       topLeftPoint = topLeftPoint.add(new Vector2(-popupWidth, 0));
     } else if (quadrant === 0b11) {
@@ -134,9 +182,6 @@ export class InfographicCanvas {
       topLeftPoint = topLeftPoint.add(new Vector2(0, -popupHeight));
     }
 
-    if (!this.hoveredPlanet?.content) {
-      return;
-    }
     this.ctx.save();
     drawRoundRect(
       this.ctx,
@@ -158,22 +203,23 @@ export class InfographicCanvas {
     }
     this.ctx.save();
 
+    this.ctx.font = "20px Questrial";
     this.ctx.textAlign = "start";
     this.ctx.fillText(
       this.sun.time !== "beyond" ? "In " + this.sun.time : "Beyond...",
-      topLeftPoint.x,
+      topLeftPoint.x + 5,
       topLeftPoint.y + 20
     );
 
-    this.ctx.font = "15px normal Noto Sans KR";
+    this.ctx.font = `${wrappedTextFontSize}px Questrial`;
 
     const wrappedText = wrapText(
       this.ctx,
       this.hoveredPlanet.content,
       topLeftPoint.x + 5,
-      topLeftPoint.y + 15,
-      150,
-      20
+      topLeftPoint.y + 23,
+      wrappedTextMaxWidth,
+      wrappedTextLineHeight
     );
 
     wrappedText.forEach((item) => {
@@ -328,8 +374,22 @@ export class InfographicCanvas {
     foreColor: string,
     backColor: string,
     time: string,
-    totalBuzz: number
+    avgBuzz: number,
+    minBuzz: number,
+    maxBuzz: number
   ) {
+    if (foreColor) {
+      const getRGBFromForeColor = foreColor
+        .trim()
+        .split("(")[1]
+        .split(")")[0]
+        .split(",") as [string, string, string];
+      this.currentFrontierColor = {
+        r: parseInt(getRGBFromForeColor[0]),
+        g: parseInt(getRGBFromForeColor[1]),
+        b: parseInt(getRGBFromForeColor[2]),
+      };
+    }
     if (!this.sun) {
       this.sun = new Sun(
         this.element,
@@ -337,46 +397,51 @@ export class InfographicCanvas {
         time,
         foreColor,
         backColor,
-        totalBuzz,
-
-        this.dpr
+        avgBuzz,
+        this.dpr,
+        minBuzz,
+        maxBuzz
       );
     } else {
-      this.sun.update({ name, time, totalBuzz: totalBuzz });
+      this.sun.update({ name, time, totalBuzz: avgBuzz, foreColor: foreColor });
     }
   }
 
   setPlanet(
     frontierDataList: Array<FrontierData>,
-    time: "2025" | "2030" | "2040" | "2050" | "beyond"
+    time: "2025" | "2030" | "2040" | "2050" | "beyond",
+    totalBuzz: number
   ) {
+    if (!this.sun) {
+      return;
+    }
     // first initialize
     this.planets = frontierDataList.map((frontierData, index) => {
       const name = frontierData.name;
-      const buzzIndex = frontierData.buzz;
+      const buzz = frontierData.buzz;
       const type = frontierData.type;
       const sources = frontierData.sources;
       const urls = frontierData.urls;
-      const maxBuzzIndex = frontierDataList
+      const maxBuzz = frontierDataList
         .map((data) => data.buzz)
         .sort((a, b) => b - a)[0];
-      const minBuzzIndex = frontierDataList
+      const minBuzz = frontierDataList
         .map((data) => data.buzz)
         .sort((a, b) => a - b)[0];
 
       const content = frontierData[time];
       return new Planet(
         this.element,
-        50,
         name,
         content,
         frontierData.color,
         "#aaa",
-        maxBuzzIndex,
-        minBuzzIndex,
+        maxBuzz,
+        minBuzz,
         index / frontierDataList.length,
-        frontierData.buzz,
-        this.dpr
+        buzz,
+        this.dpr,
+        this.sun!
       );
     });
   }
@@ -385,7 +450,6 @@ export class InfographicCanvas {
     this.planets.forEach((planet) => {
       const queriedData = data.find((element) => element.name === planet.name);
       if (queriedData) {
-        console.log("updated");
         planet.update({
           title: queriedData.name,
           content: queriedData.content,
@@ -408,19 +472,6 @@ export class InfographicCanvas {
     logoImg: string,
     mfi: number
   ) {}
-
-  // updateSun(data: Partial<CryptoDataFields>) {
-  //   if (this.sun) {
-  //     this.sun.update(data);
-  //   }
-  // }
-
-  // updatePlanet(planetName: string, data: Partial<CryptoDataFields>) {
-  //   const planet = this.planets.find((planet) => planet.name === planetName);
-  //   if (planet) {
-  //     planet.update(data);
-  //   }
-  // }
 
   initialize() {
     // this.planets.push(new Planet(this.element, this.sun.radius + 50, 1, 80));
@@ -464,12 +515,14 @@ export class InfographicCanvas {
         0,
         1
       ),
-      `rgba(0, 25, 60, ${changeRelativeValueToRealValueInversed(
+      `rgba(${this.currentFrontierColor.r}, ${this.currentFrontierColor.g}, ${
+        this.currentFrontierColor.b
+      }, ${changeRelativeValueToRealValueInversed(
         Math.abs(this.loop - this.backgroundLoopMax / 2),
         0,
         this.backgroundLoopMax / 2,
         0,
-        1
+        0.15
       )})`
     );
     grad.addColorStop(1, `rgba(0, 0, 0, 0)`);
