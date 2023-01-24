@@ -1,17 +1,17 @@
 {
   "files": {
-    "main.css": "/dataviz_future_frontiers/static/css/main.de4ed8a4.chunk.css",
-    "main.js": "/dataviz_future_frontiers/static/js/main.291dd506.chunk.js",
-    "main.js.map": "/dataviz_future_frontiers/static/js/main.291dd506.chunk.js.map",
-    "runtime-main.js": "/dataviz_future_frontiers/static/js/runtime-main.60812106.js",
-    "runtime-main.js.map": "/dataviz_future_frontiers/static/js/runtime-main.60812106.js.map",
-    "static/js/2.8c7f1899.chunk.js": "/dataviz_future_frontiers/static/js/2.8c7f1899.chunk.js",
-    "static/js/2.8c7f1899.chunk.js.map": "/dataviz_future_frontiers/static/js/2.8c7f1899.chunk.js.map",
-    "static/js/3.4250ea84.chunk.js": "/dataviz_future_frontiers/static/js/3.4250ea84.chunk.js",
-    "static/js/3.4250ea84.chunk.js.map": "/dataviz_future_frontiers/static/js/3.4250ea84.chunk.js.map",
+    "main.css": "/dataviz_future_frontiers/static/css/main.a199a584.chunk.css",
+    "main.js": "/dataviz_future_frontiers/static/js/main.97905cd5.chunk.js",
+    "main.js.map": "/dataviz_future_frontiers/static/js/main.97905cd5.chunk.js.map",
+    "runtime-main.js": "/dataviz_future_frontiers/static/js/runtime-main.1a08cdfb.js",
+    "runtime-main.js.map": "/dataviz_future_frontiers/static/js/runtime-main.1a08cdfb.js.map",
+    "static/js/2.32054b34.chunk.js": "/dataviz_future_frontiers/static/js/2.32054b34.chunk.js",
+    "static/js/2.32054b34.chunk.js.map": "/dataviz_future_frontiers/static/js/2.32054b34.chunk.js.map",
+    "static/js/3.c1b5ea83.chunk.js": "/dataviz_future_frontiers/static/js/3.c1b5ea83.chunk.js",
+    "static/js/3.c1b5ea83.chunk.js.map": "/dataviz_future_frontiers/static/js/3.c1b5ea83.chunk.js.map",
     "index.html": "/dataviz_future_frontiers/index.html",
-    "static/css/main.de4ed8a4.chunk.css.map": "/dataviz_future_frontiers/static/css/main.de4ed8a4.chunk.css.map",
-    "static/js/2.8c7f1899.chunk.js.LICENSE.txt": "/dataviz_future_frontiers/static/js/2.8c7f1899.chunk.js.LICENSE.txt",
+    "static/css/main.a199a584.chunk.css.map": "/dataviz_future_frontiers/static/css/main.a199a584.chunk.css.map",
+    "static/js/2.32054b34.chunk.js.LICENSE.txt": "/dataviz_future_frontiers/static/js/2.32054b34.chunk.js.LICENSE.txt",
     "static/media/aave.7e0cb55c.png": "/dataviz_future_frontiers/static/media/aave.7e0cb55c.png",
     "static/media/algo.2147c30f.png": "/dataviz_future_frontiers/static/media/algo.2147c30f.png",
     "static/media/ankr.1c8b1fdd.png": "/dataviz_future_frontiers/static/media/ankr.1c8b1fdd.png",
@@ -36,9 +36,9 @@
     "static/media/xtz.e4e840ab.png": "/dataviz_future_frontiers/static/media/xtz.e4e840ab.png"
   },
   "entrypoints": [
-    "static/js/runtime-main.60812106.js",
-    "static/js/2.8c7f1899.chunk.js",
-    "static/css/main.de4ed8a4.chunk.css",
-    "static/js/main.291dd506.chunk.js"
+    "static/js/runtime-main.1a08cdfb.js",
+    "static/js/2.32054b34.chunk.js",
+    "static/css/main.a199a584.chunk.css",
+    "static/js/main.97905cd5.chunk.js"
   ]
 }
