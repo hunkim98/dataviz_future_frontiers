@@ -21,6 +21,7 @@ const Infographic = () => {
     currentFrontier,
     minMaxAvgBuzz,
     minMaxTotalBuzz,
+    minMaxIndividualBuzz,
   } = useContext(FrontiersContext);
 
   const notify = (time: string) =>
@@ -118,8 +119,25 @@ const Infographic = () => {
     if (!minMaxTotalBuzz) {
       return;
     }
-    console.log("min", minMaxAvgBuzz.min, "max", minMaxAvgBuzz.max);
-    console.log("avg", currentFrontier.avgBuzz);
+    if (!minMaxIndividualBuzz) {
+      return;
+    }
+    const minMaxAvgCurrentFrontierBuzz = currentFrontier.data.reduce(
+      (acc, curr) => {
+        if (curr.buzz) {
+          acc.avg = curr.buzz / currentFrontier.data.length;
+          if (curr.buzz > acc.max) {
+            acc.max = curr.buzz;
+          }
+          if (curr.buzz < acc.min) {
+            acc.min = curr.buzz;
+          }
+        }
+        return acc;
+      },
+      { min: Number.MAX_VALUE, max: 0, avg: 0 }
+    );
+
     infographicCanvasRef.current.setSun(
       currentFrontier.title,
       currentFrontier.color,
@@ -132,9 +150,16 @@ const Infographic = () => {
     infographicCanvasRef.current.setPlanet(
       currentFrontier.data,
       FrontierTime._2025,
-      currentFrontier.totalBuzz
+      currentFrontier.totalBuzz,
+      minMaxIndividualBuzz.max,
+      minMaxIndividualBuzz.min,
+      minMaxAvgCurrentFrontierBuzz.max,
+      minMaxAvgCurrentFrontierBuzz.min,
+      currentFrontier.avgBuzz,
+      minMaxAvgBuzz.max,
+      minMaxAvgBuzz.min
     );
-  }, [currentFrontier, minMaxAvgBuzz, minMaxTotalBuzz]);
+  }, [currentFrontier, minMaxAvgBuzz, minMaxTotalBuzz, minMaxIndividualBuzz]);
 
   useEffect(() => {
     const onResize = () => {
@@ -183,6 +208,7 @@ const Infographic = () => {
             const frontierData = frontiers.get(frontier);
             return (
               <div
+                key={frontier}
                 style={{
                   display: "flex",
                   alignItems: "center",

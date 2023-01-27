@@ -156,15 +156,34 @@ export class Sun {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     // ctx.fillStyle = `rgba(255, 255, 255, 0.8)`;
-    const fontSize = 35;
-    const lineHeight = 35;
+    const fontSize = changeRelativeValueToRealValue(
+      this.totalBuzz,
+      this.minBuzz,
+      this.maxBuzz,
+      20,
+      35
+    );
+    const lineHeight = changeRelativeValueToRealValue(
+      this.totalBuzz,
+      this.minBuzz,
+      this.maxBuzz,
+      20,
+      35
+    );
     ctx.font = `${fontSize}px Questrial`;
+    const wrappedTextMaxWidth = changeRelativeValueToRealValue(
+      this.totalBuzz,
+      this.minBuzz,
+      this.maxBuzz,
+      100,
+      200
+    );
     const wrappedText = wrapText(
       ctx,
       this.name,
       drawPosition.x,
       drawPosition.y,
-      200,
+      wrappedTextMaxWidth,
       lineHeight
     );
     let lastYLocation = 0;
@@ -179,8 +198,47 @@ export class Sun {
     });
 
     ctx.save();
-    ctx.font = "24px Questrial";
-    ctx.fillText(this.time, drawPosition.x, lastYLocation + 40);
+
+    const yearTextSize = changeRelativeValueToRealValue(
+      this.totalBuzz,
+      this.minBuzz,
+      this.maxBuzz,
+      16,
+      24
+    );
+    const yearMarginTop = changeRelativeValueToRealValue(
+      this.totalBuzz,
+      this.minBuzz,
+      this.maxBuzz,
+      30,
+      40
+    );
+
+    const buzzTextSize = changeRelativeValueToRealValue(
+      this.totalBuzz,
+      this.minBuzz,
+      this.maxBuzz,
+      13,
+      18
+    );
+
+    const buzzMarginTop = changeRelativeValueToRealValue(
+      this.totalBuzz,
+      this.minBuzz,
+      this.maxBuzz,
+      25,
+      30
+    );
+    ctx.font = `${yearTextSize}px Questrial`;
+    ctx.fillText(this.time, drawPosition.x, lastYLocation + yearMarginTop);
+
+    ctx.font = `${buzzTextSize}px Questrial`;
+    ctx.fillStyle = `rgba(255, 255, 255, 0.8)`;
+    ctx.fillText(
+      `Total Buzz : ${this.totalBuzz.toLocaleString()}`,
+      drawPosition.x,
+      drawPosition.y + this.radius + buzzMarginTop
+    );
 
     ctx.restore();
   }

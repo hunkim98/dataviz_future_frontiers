@@ -59,6 +59,12 @@ interface FrontiersContextElements {
         max: number;
       }
     | undefined;
+  minMaxIndividualBuzz:
+    | {
+        min: number;
+        max: number;
+      }
+    | undefined;
 }
 
 const FrontiersContext = createContext<FrontiersContextElements>(
@@ -74,6 +80,10 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
     max: number;
   }>();
   const [minMaxTotalBuzz, setMinMaxTotalBuzz] = useState<{
+    min: number;
+    max: number;
+  }>();
+  const [minMaxIndividualBuzz, setMinMaxIndividualBuzz] = useState<{
     min: number;
     max: number;
   }>();
@@ -157,19 +167,28 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
       let minAvg = Number.MAX_VALUE;
       let maxTotalBuzz = 0;
       let minTotalBuzz = Number.MAX_VALUE;
+      let maxIndividualBuzz = 0;
+      let minIndividualBuzz = Number.MAX_VALUE;
       for (
         let it = frontierSet.values(), val: string = "";
         (val = it.next().value);
 
       ) {
         const filtered = frontierData.filter((d) => d.frontier === val);
-        const avgBuzz = filtered.reduce((acc, curr) => {
-          if (curr.buzz) {
-            return acc + curr.buzz / filtered.length;
-          } else {
+        const minMaxOfCurrentFrontier = filtered.reduce(
+          (acc, curr) => {
+            if (curr.buzz) {
+              if (curr.buzz > acc.max) {
+                acc.max = curr.buzz;
+              }
+              if (curr.buzz < acc.min) {
+                acc.min = curr.buzz;
+              }
+            }
             return acc;
-          }
-        }, 0);
+          },
+          { min: Number.MAX_VALUE, max: 0 }
+        );
         const totalBuzz = filtered.reduce((acc, curr) => {
           if (curr.buzz) {
             return acc + curr.buzz;
@@ -177,7 +196,9 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
             return acc;
           }
         }, 0);
+        const avgBuzz = totalBuzz / filtered.length;
         if (avgBuzz > maxAvg) {
+          console.log(val, avgBuzz);
           maxAvg = avgBuzz;
         }
         if (avgBuzz < minAvg) {
@@ -188,6 +209,12 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
         }
         if (totalBuzz < minTotalBuzz) {
           minTotalBuzz = totalBuzz;
+        }
+        if (minMaxOfCurrentFrontier.max > maxIndividualBuzz) {
+          maxIndividualBuzz = minMaxOfCurrentFrontier.max;
+        }
+        if (minMaxOfCurrentFrontier.min < minIndividualBuzz) {
+          minIndividualBuzz = minMaxOfCurrentFrontier.min;
         }
 
         setFrontiers((prev) => {
@@ -201,6 +228,10 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
       }
       setMinMaxTotalBuzz({ min: minTotalBuzz, max: maxTotalBuzz });
       setMinMaxAvgBuzz({ min: minAvg, max: maxAvg });
+      setMinMaxIndividualBuzz({
+        min: minIndividualBuzz,
+        max: maxIndividualBuzz,
+      });
     });
   }, []);
 
@@ -239,6 +270,7 @@ const FrontiersContextProvider: React.FC<Props> = ({ children }) => {
         changeFrontier,
         minMaxAvgBuzz,
         minMaxTotalBuzz,
+        minMaxIndividualBuzz,
       }}
     >
       {children}

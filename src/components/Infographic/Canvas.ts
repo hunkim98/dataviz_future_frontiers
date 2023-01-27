@@ -30,6 +30,7 @@ export class InfographicCanvas {
   hoveredPlanet: Planet | null = null;
   isPopupOpen: boolean = false;
   isSunHovered: boolean = false;
+
   currentFrontierColor: { r: number; g: number; b: number } = {
     r: 0,
     g: 25,
@@ -410,11 +411,19 @@ export class InfographicCanvas {
   setPlanet(
     frontierDataList: Array<FrontierData>,
     time: "2025" | "2030" | "2040" | "2050" | "beyond",
-    totalBuzz: number
+    totalBuzz: number,
+    maxIndividualPlanetBuzz: number,
+    minIndividualPlanetBuzz: number,
+    currentFrontierMaxBuzz: number,
+    currentFrontierMinBuzz: number,
+    currentFrontierAvgBuzz: number,
+    maxAvgBuzz: number,
+    minAvgBuzz: number
   ) {
     if (!this.sun) {
       return;
     }
+    console.log(currentFrontierAvgBuzz, "avg");
     // first initialize
     this.planets = frontierDataList.map((frontierData, index) => {
       const name = frontierData.name;
@@ -441,7 +450,14 @@ export class InfographicCanvas {
         index / frontierDataList.length,
         buzz,
         this.dpr,
-        this.sun!
+        this.sun!,
+        maxIndividualPlanetBuzz,
+        minIndividualPlanetBuzz,
+        currentFrontierMaxBuzz,
+        currentFrontierMinBuzz,
+        currentFrontierAvgBuzz,
+        maxAvgBuzz,
+        minAvgBuzz
       );
     });
   }

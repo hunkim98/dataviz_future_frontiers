@@ -39,6 +39,13 @@ export class Planet {
   maxBuzzIndex: number;
   minBuzzIndex: number;
   sentimentDegree: number;
+  maxIndividualPlanetBuzz: number;
+  minIndividualPlanetBuzz: number;
+  currentFrontierMaxBuzz: number;
+  currentFrontierMinBuzz: number;
+  currentFrontierAvgBuzz: number;
+  maxAvgBuzz: number;
+  minAvgBuzz: number;
   sun: Sun;
   constructor(
     canvas: HTMLCanvasElement,
@@ -51,9 +58,25 @@ export class Planet {
     angleTiltRatio: number,
     buzz: number,
     dpr: number,
-    sun: Sun
+    sun: Sun,
+    maxIndividualPlanetBuzz: number,
+    minIndividualPlanetBuzz: number,
+    currentFrontierMaxBuzz: number,
+    currentFrontierMinBuzz: number,
+    currentFrontierAvgBuzz: number,
+    maxAvgBuzz: number,
+    minAvgBuzz: number
   ) {
     this.name = name;
+    this.maxIndividualPlanetBuzz = maxIndividualPlanetBuzz;
+    this.minIndividualPlanetBuzz = minIndividualPlanetBuzz;
+    this.currentFrontierMaxBuzz = currentFrontierMaxBuzz;
+    this.currentFrontierMinBuzz = currentFrontierMinBuzz;
+    this.currentFrontierAvgBuzz = currentFrontierAvgBuzz;
+
+    this.maxAvgBuzz = maxAvgBuzz;
+    this.minAvgBuzz = minAvgBuzz;
+
     this.sun = sun;
     this.buzz = buzz;
     this.maxBuzzIndex = maxBuzzIndex;
@@ -67,12 +90,25 @@ export class Planet {
       buzz,
       minBuzzIndex,
       maxBuzzIndex,
-      60,
+      50,
       100
     );
     this.spaceShips = [];
     this.ctx = this.canvas.getContext("2d")!;
-    this.distanceFromSun = 300;
+    console.log(
+      "hi",
+      currentFrontierMaxBuzz,
+      minIndividualPlanetBuzz,
+      maxIndividualPlanetBuzz
+    );
+    this.distanceFromSun =
+      changeRelativeValueToRealValue(
+        currentFrontierAvgBuzz,
+        minAvgBuzz,
+        maxAvgBuzz,
+        150,
+        200
+      ) + this.sun.radius;
     this.speed = 0.05;
     this.dpr = dpr;
 
@@ -299,7 +335,7 @@ export class Planet {
       this.ctx.fillStyle = `rgba(255, 255, 255, ${changeRelativeValueToRealValueInversed(
         this.sentimentDegree,
         0,
-        5,
+        3,
         0,
         0.5
       )})`;
@@ -347,7 +383,13 @@ export class Planet {
     this.ctx.textAlign = "center";
     this.ctx.textBaseline = "middle";
     // this.ctx.fillStyle = `rgba(255, 255, 255, 0.8)`;
-    const fontSize = 14;
+    const fontSize = changeRelativeValueToRealValue(
+      this.buzz,
+      this.minBuzzIndex,
+      this.maxBuzzIndex,
+      12,
+      16
+    );
     const lineHeight = 20;
     this.ctx.font = `bold ${fontSize}px Questrial`;
     const wrappedText = wrapText(
@@ -373,6 +415,28 @@ export class Planet {
         // lineHeightOffset
       );
     });
+
+    const buzzTextSize = changeRelativeValueToRealValue(
+      this.buzz,
+      this.minBuzzIndex,
+      this.maxBuzzIndex,
+      12,
+      16
+    );
+    const buzzTextUpperMargin = changeRelativeValueToRealValue(
+      this.buzz,
+      this.minBuzzIndex,
+      this.maxBuzzIndex,
+      11,
+      16
+    );
+    this.ctx.font = `${buzzTextSize}px Questrial`;
+    this.ctx.fillStyle = `rgba(255, 255, 255, 0.8)`;
+    this.ctx.fillText(
+      this.buzz ? "Buzz: " + this.buzz.toLocaleString() : "No data",
+      this.canvasDrawPosition.x,
+      this.canvasDrawPosition.y + this.radius + buzzTextUpperMargin
+    );
     // this.ctx.fillText(
     //   this.rotator.degree.toFixed(2),
     //   drawPosition.x,
