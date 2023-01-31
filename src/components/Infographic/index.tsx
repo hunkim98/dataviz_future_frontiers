@@ -230,6 +230,9 @@ const Infographic = () => {
         toastOptions={{
           duration: 1000,
         }}
+        containerStyle={{
+          fontFamily: "Questrial",
+        }}
       />
       <div
         style={{
