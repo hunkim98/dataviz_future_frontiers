@@ -6,8 +6,9 @@ export const Container = styled.div`
 
 export const MainTitle = styled.div`
   align-self: center;
-  font-size: 25px;
+  font-size: 23px;
   margin-bottom: 20px;
+  text-align: center;
   font-weight: bold;
 `;
 

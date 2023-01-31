@@ -1,4 +1,3 @@
-import { CryptoDataFields } from "context/CryptoContext";
 import { changeRelativeValueToRealValue } from "utils/clamp";
 import { wrapText } from "utils/text";
 import { convertCartesianToScreenPoint } from "../../utils/cartesian";

@@ -1,4 +1,3 @@
-import { CryptoDataFields } from "context/CryptoContext";
 import {
   changeRelativeValueToRealValue,
   changeRelativeValueToRealValueInversed,
@@ -7,7 +6,6 @@ import { generateRandomName } from "utils/generateRandomName";
 import { convertCartesianToScreenPoint } from "../../utils/cartesian";
 import { Vector2 } from "../../utils/math/Vector2";
 import { Rotator2D } from "../../utils/rotator2d";
-import { Spaceship, SpaceshipDirection } from "./Spaceship";
 import { Sun } from "./Sun";
 import { returnRandomInRange } from "utils/randomInRange";
 import Sentiment from "sentiment";
@@ -21,10 +19,8 @@ export class Planet {
   position: Vector2;
   speed: number;
   distanceFromSun: number;
-  spaceShips: Array<Spaceship>;
   ctx: CanvasRenderingContext2D;
   greenness: number | null = null;
-  spaceShipDirection = SpaceshipDirection.IN;
   //   spaceShipCount: number;
   //   spaceShipDirection: SpaceshipDirection;
   //   spaceShipRegenerationInterval: number;
@@ -93,7 +89,6 @@ export class Planet {
       50,
       100
     );
-    this.spaceShips = [];
     this.ctx = this.canvas.getContext("2d")!;
     console.log(
       "hi",
@@ -136,46 +131,6 @@ export class Planet {
       const sentiment = new Sentiment();
       this.sentimentDegree = sentiment.analyze(this.content).score;
     }
-  }
-
-  setSpaceshipInformation(rsi: number) {
-    let spaceShipCount = 0;
-    let spaceShipDirection: SpaceshipDirection = SpaceshipDirection.IN;
-    let spaceShipRegenerationInterval = 20000;
-    if (rsi >= 70) {
-      spaceShipCount = 3;
-      spaceShipDirection = SpaceshipDirection.IN;
-      spaceShipRegenerationInterval = 1000;
-      // this.iceAgeImage.src = "";
-    } else if (60 <= rsi && rsi < 70) {
-      spaceShipCount = 1;
-      spaceShipDirection = SpaceshipDirection.IN;
-      spaceShipRegenerationInterval = 10000;
-      // this.iceAgeImage.src = "";
-    } else if (40 <= rsi && rsi < 60) {
-      spaceShipCount = 0;
-      spaceShipDirection = SpaceshipDirection.OUT;
-      spaceShipRegenerationInterval = 20000;
-      // this.iceAgeImage.src =
-      // iceAgeLevel1[Math.floor(Math.random() * iceAgeLevel1.length)];
-    } else if (30 <= rsi && rsi < 40) {
-      spaceShipCount = 1;
-      spaceShipDirection = SpaceshipDirection.OUT;
-      spaceShipRegenerationInterval = 10000;
-      // this.iceAgeImage.src =
-      // iceAgeLevel2[Math.floor(Math.random() * iceAgeLevel2.length)];
-    } else {
-      spaceShipCount = 3;
-      spaceShipDirection = SpaceshipDirection.OUT;
-      spaceShipRegenerationInterval = 1000;
-      // this.iceAgeImage.src =
-      // iceAgeLevel3[Math.floor(Math.random() * iceAgeLevel3.length)];
-    }
-    return {
-      spaceShipCount,
-      spaceShipDirection,
-      spaceShipRegenerationInterval,
-    };
   }
 
   calcSpeed(increaseRatio: number) {
@@ -268,35 +223,6 @@ export class Planet {
       return { edgePosition: new Vector2(x, y), edgeRotator: criterionRotator };
     }
   }
-  setSpaceShip() {
-    const { edgePosition, edgeRotator } = this.getCanvasOuterTrajectoryPoint();
-    if (this.spaceShips.length < 3) {
-      this.spaceShips.push(
-        new Spaceship(
-          this.canvas,
-          edgePosition,
-          this.rotator,
-          edgeRotator,
-          this,
-          this.spaceShipDirection,
-          generateRandomName(),
-          this.dpr
-        )
-      );
-    }
-  }
-
-  drawSpaceShips() {
-    for (const spaceShip of this.spaceShips) {
-      spaceShip.draw();
-    }
-  }
-
-  removeSpaceShip(spaceShipId: string) {
-    this.spaceShips = this.spaceShips.filter(
-      (spaceShip) => spaceShip.id !== spaceShipId
-    );
-  }
 
   setIsPopupOpen(isPopupOpen: boolean) {
     this.isPopupOpen = isPopupOpen;
@@ -346,7 +272,6 @@ export class Planet {
   }
 
   draw() {
-    this.drawSpaceShips();
     this.rotator.degree += this.speed;
     const positionAffineVector = new Vector2(this.distanceFromSun, 0).toAffine(
       true
@@ -447,6 +372,5 @@ export class Planet {
   }
   setDpr(dpr: number) {
     this.dpr = dpr;
-    this.spaceShips.forEach((spaceShip) => spaceShip.setDpr(dpr));
   }
 }

@@ -1,5 +1,7 @@
-import { IconArrowBigLeft } from "@tabler/icons";
+import { WGSLogo } from "assets/wgs_logo";
+import AboutPopup from "components/AboutPopup/AboutPopup";
 import { ExampleColorPallet, FrontiersContext } from "context/FrontiersContext";
+import useHandleClickOutside from "hooks/useHandleClickOutside";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { InfographicCanvas } from "./Canvas";
@@ -15,6 +17,12 @@ const Infographic = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const divRef = useRef<HTMLDivElement>(null);
   const infographicCanvasRef = useRef<InfographicCanvas | null>(null);
+  const [isAboutPopupOpen, setIsAboutPopupOpen] = React.useState(false);
+  const aboutPopupRef = useRef<any>(null);
+  useHandleClickOutside({
+    wrapperRef: aboutPopupRef,
+    setOpenBooleanState: setIsAboutPopupOpen,
+  });
 
   const {
     frontiers,
@@ -42,7 +50,12 @@ const Infographic = () => {
 
   useEffect(() => {
     notify(time);
+  }, [time]);
+
+  useEffect(() => {
+    if (!divRef.current) return;
     const handleWheel = (event: WheelEvent) => {
+      if (isAboutPopupOpen) return;
       const isDeltaPositive = event.deltaY < 0;
       const isDeltaOverFifty = Math.abs(event.deltaY) > 20;
       if (isDeltaPositive && isDeltaOverFifty) {
@@ -67,11 +80,13 @@ const Infographic = () => {
         }
       }
     };
-    window.addEventListener("wheel", handleWheel);
+    divRef.current.addEventListener("wheel", handleWheel);
     return () => {
-      window.removeEventListener("wheel", handleWheel);
+      if (divRef.current) {
+        divRef.current.removeEventListener("wheel", handleWheel);
+      }
     };
-  }, [time]);
+  }, [time, divRef, isAboutPopupOpen]);
 
   useEffect(() => {
     if (!infographicCanvasRef.current) {
@@ -193,12 +208,65 @@ const Infographic = () => {
       }}
       ref={divRef}
     >
+      <AboutPopup isOpen={isAboutPopupOpen} setIsOpen={setIsAboutPopupOpen} />
       <Toaster
         position="bottom-center"
         toastOptions={{
           duration: 1000,
         }}
       />
+      <div
+        style={{
+          position: "absolute",
+          right: 30,
+          top: 80,
+          color: "white",
+          fontSize: 13,
+          fontFamily: "Questrial",
+          textAlign: "right",
+        }}
+      >
+        <div
+          style={{
+            marginBottom: 10,
+          }}
+        >
+          <strong>Guides</strong>
+        </div>
+        <ul
+          style={{
+            listStyle: "none",
+            padding: 0,
+            margin: 0,
+            lineHeight: "1.5em",
+          }}
+        >
+          <li>🐝 Sun/Planet Size represents buzz (google search results)</li>
+          <li>🪐 Hover over a planet to see the details</li>
+          <li>🖱 Scroll to change time</li>
+          <li
+            style={{
+              opacity: 0.6,
+              cursor: "pointer",
+            }}
+            onClick={() => setIsAboutPopupOpen(true)}
+          >
+            More...
+          </li>
+        </ul>
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          opacity: 0.3,
+          left: 30,
+          width: 300,
+          top: 80,
+          height: "auto",
+        }}
+      >
+        <WGSLogo fill="white" />
+      </div>
 
       <div
         style={{
@@ -271,7 +339,7 @@ const Infographic = () => {
         style={{
           position: "absolute",
           bottom: 0,
-          right: 0,
+          right: 30,
           height: 80,
           font: "25px Questrial",
           background: "none",
@@ -298,7 +366,7 @@ const Infographic = () => {
         style={{
           position: "absolute",
           bottom: 0,
-          left: 0,
+          left: 30,
           height: 80,
           font: "25px Questrial",
           background: "none",

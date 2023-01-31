@@ -1,4 +1,3 @@
-import { Language } from "context/CryptoContext";
 import { FrontierData } from "context/FrontiersContext";
 import { convertCartesianToScreenPoint } from "utils/cartesian";
 import {
@@ -19,7 +18,6 @@ export class InfographicCanvas {
   height: number = 0;
   loop: number = 0;
   sun: Sun | null;
-  language: Language;
   planets: Array<Planet> = [];
   requestAnimationFrameId: number;
   MIN_PLANET_SIZE = 20;
@@ -38,7 +36,6 @@ export class InfographicCanvas {
   };
 
   constructor(element: HTMLCanvasElement) {
-    this.language = Language.KOREAN;
     this.element = element;
     this.ctx = element.getContext("2d")!;
     this.sun = null;
@@ -46,10 +43,6 @@ export class InfographicCanvas {
     this.requestAnimationFrameId = requestAnimationFrame(this.render);
     this.planets = [];
     this.initialize();
-  }
-
-  changeLanguage(language: Language) {
-    this.language = language;
   }
 
   onMouseMove(e: MouseEvent) {
@@ -194,7 +187,7 @@ export class InfographicCanvas {
       width,
       height
     );
-    this.ctx.fillStyle = `rgba(255,255,255, 0.95)`;
+    this.ctx.fillStyle = `rgba(255,255,255,0.95)`;
     this.ctx.fill();
     this.ctx.stroke();
     this.ctx.restore();
