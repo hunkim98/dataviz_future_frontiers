@@ -1,5 +1,6 @@
 import { WGSLogo } from "assets/wgs_logo";
 import AboutPopup from "components/AboutPopup/AboutPopup";
+import SourcePopup from "components/SourcePopup/SourcePopup";
 import { ExampleColorPallet, FrontiersContext } from "context/FrontiersContext";
 import useHandleClickOutside from "hooks/useHandleClickOutside";
 import React, { useContext, useEffect, useRef, useState } from "react";
@@ -18,6 +19,7 @@ const Infographic = () => {
   const divRef = useRef<HTMLDivElement>(null);
   const infographicCanvasRef = useRef<InfographicCanvas | null>(null);
   const [isAboutPopupOpen, setIsAboutPopupOpen] = React.useState(false);
+  const [isSourcePopupOpen, setIsSourcePopupOpen] = React.useState(false);
   const aboutPopupRef = useRef<any>(null);
   useHandleClickOutside({
     wrapperRef: aboutPopupRef,
@@ -55,7 +57,7 @@ const Infographic = () => {
   useEffect(() => {
     if (!divRef.current) return;
     const handleWheel = (event: WheelEvent) => {
-      if (isAboutPopupOpen) return;
+      if (isAboutPopupOpen || isSourcePopupOpen) return;
       const isDeltaPositive = event.deltaY < 0;
       const isDeltaOverFifty = Math.abs(event.deltaY) > 20;
       if (isDeltaPositive && isDeltaOverFifty) {
@@ -86,7 +88,7 @@ const Infographic = () => {
         divRef.current.removeEventListener("wheel", handleWheel);
       }
     };
-  }, [time, divRef, isAboutPopupOpen]);
+  }, [time, divRef, isAboutPopupOpen, isSourcePopupOpen]);
 
   useEffect(() => {
     if (!infographicCanvasRef.current) {
@@ -119,7 +121,10 @@ const Infographic = () => {
       return () => {};
     }
     if (!infographicCanvasRef.current) {
-      const infographicCanvas = new InfographicCanvas(canvasRef.current);
+      const infographicCanvas = new InfographicCanvas(
+        canvasRef.current,
+        setIsSourcePopupOpen
+      );
       infographicCanvasRef.current = infographicCanvas;
     }
   }, [frontiers]);
@@ -209,6 +214,17 @@ const Infographic = () => {
       ref={divRef}
     >
       <AboutPopup isOpen={isAboutPopupOpen} setIsOpen={setIsAboutPopupOpen} />
+      {currentFrontier && (
+        <SourcePopup
+          isOpen={isSourcePopupOpen}
+          setIsOpen={setIsSourcePopupOpen}
+          currentFrontierName={currentFrontier.title}
+          sourceUrls={currentFrontier?.data.map((frontier) => ({
+            topic: frontier.name,
+            urls: frontier.urls,
+          }))}
+        />
+      )}
       <Toaster
         position="bottom-center"
         toastOptions={{
@@ -243,6 +259,7 @@ const Infographic = () => {
         >
           <li>🐝 Sun/Planet Size represents buzz (google search results)</li>
           <li>🪐 Hover over a planet to see the details</li>
+          <li>🔎 Click the sun to see the sources</li>
           <li>🖱 Scroll to change time</li>
           <li
             style={{

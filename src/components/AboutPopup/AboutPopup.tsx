@@ -25,7 +25,7 @@ const AboutPopup: React.FC<Props> = ({ isOpen, setIsOpen }) => {
         visibility: isOpen ? "visible" : "hidden",
         opacity: isOpen ? 1 : 0,
         transition: "visibility 0.2s, opacity 0.2s",
-        fontFamily: "Nanum Gothic",
+        fontFamily: "Questrial",
       }}
     >
       <div

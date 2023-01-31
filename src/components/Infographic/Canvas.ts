@@ -28,6 +28,7 @@ export class InfographicCanvas {
   hoveredPlanet: Planet | null = null;
   isPopupOpen: boolean = false;
   isSunHovered: boolean = false;
+  openSourceUrls: (isOpen: boolean) => void;
 
   currentFrontierColor: { r: number; g: number; b: number } = {
     r: 0,
@@ -35,14 +36,34 @@ export class InfographicCanvas {
     b: 60,
   };
 
-  constructor(element: HTMLCanvasElement) {
+  constructor(
+    element: HTMLCanvasElement,
+    openSourceUrls: (isOpen: boolean) => void
+  ) {
     this.element = element;
+    this.openSourceUrls = openSourceUrls;
     this.ctx = element.getContext("2d")!;
     this.sun = null;
     this.render();
     this.requestAnimationFrameId = requestAnimationFrame(this.render);
     this.planets = [];
     this.initialize();
+  }
+
+  onMouseClick(e: MouseEvent) {
+    if (this.sun) {
+      const screenPoint = convertCartesianToScreenPoint(
+        this.element,
+        this.sun.position,
+        this.dpr
+      );
+      const distanceToSun = screenPoint.squareDistanceTo(
+        new Vector2(e.clientX, e.clientY)
+      );
+      if (Math.sqrt(distanceToSun) < this.sun.radius) {
+        this.openSourceUrls(true);
+      }
+    }
   }
 
   onMouseMove(e: MouseEvent) {
@@ -443,7 +464,7 @@ export class InfographicCanvas {
         .map((data) => data.buzz)
         .sort((a, b) => a - b)[0];
 
-      const content = frontierData[time];
+      const content = frontierData[time] as string;
       return new Planet(
         this.element,
         name,
@@ -497,7 +518,9 @@ export class InfographicCanvas {
   initialize() {
     // this.planets.push(new Planet(this.element, this.sun.radius + 50, 1, 80));
     this.onMouseMove = this.onMouseMove.bind(this);
+    this.onMouseClick = this.onMouseClick.bind(this);
     this.element.addEventListener("mousemove", this.onMouseMove);
+    this.element.addEventListener("click", this.onMouseClick);
   }
 
   setWidth(width: number, devicePixelRatio?: number) {
