@@ -4,6 +4,7 @@
   "private": true,
   "homepage": "https://hunkim98.github.io/dataviz_future_frontiers",
   "dependencies": {
+    "@tabler/icons": "^2.1.2",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",

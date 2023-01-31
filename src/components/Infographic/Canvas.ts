@@ -166,7 +166,7 @@ export class InfographicCanvas {
       }
     });
 
-    const popupHeight = headerHeight + maxHeight - minHeight + 27;
+    const popupHeight = headerHeight + maxHeight - minHeight + 27 + 40;
     // mockedWrappedText.length * 10;
     // -
     // (mockedWrappedText[2][2] as number);
@@ -223,7 +223,12 @@ export class InfographicCanvas {
       wrappedTextLineHeight
     );
 
-    wrappedText.forEach((item) => {
+    let lastLineHeight = 0;
+
+    wrappedText.forEach((item, index) => {
+      if (index === wrappedText.length - 1) {
+        lastLineHeight = item[2] as number;
+      }
       this.ctx.fillText(
         String(item[0]).trim(),
         item[1] as number,
@@ -231,6 +236,13 @@ export class InfographicCanvas {
         // lineHeightOffset
       );
     });
+
+    this.ctx.fillStyle = "rgba(0,0,0, 0.95)";
+    this.ctx.fillText(
+      "Sentence Positvity: " + this.hoveredPlanet.sentimentDegree,
+      topLeftPoint.x + 5,
+      lastLineHeight + 20 + 40
+    );
 
     this.ctx.restore();
 

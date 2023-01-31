@@ -1,3 +1,4 @@
+import { IconArrowBigLeft } from "@tabler/icons";
 import { ExampleColorPallet, FrontiersContext } from "context/FrontiersContext";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
@@ -24,7 +25,8 @@ const Infographic = () => {
     minMaxIndividualBuzz,
   } = useContext(FrontiersContext);
 
-  const notify = (time: string) =>
+  const notify = (time: string) => {
+    toast.dismiss();
     toast(`Timeline set to ${time}`, {
       icon: "👏",
       style: {
@@ -34,6 +36,7 @@ const Infographic = () => {
         color: "#fff",
       },
     });
+  };
 
   const [time, setTime] = useState<FrontierTime>(FrontierTime._2025);
 
@@ -190,7 +193,13 @@ const Infographic = () => {
       }}
       ref={divRef}
     >
-      {/* <Toaster position="bottom-center" /> */}
+      <Toaster
+        position="bottom-center"
+        toastOptions={{
+          duration: 1000,
+        }}
+      />
+
       <div
         style={{
           position: "absolute",
@@ -246,6 +255,60 @@ const Infographic = () => {
           })}
       </div>
       <canvas ref={canvasRef} />
+      <button
+        onClick={() => {
+          if (time === FrontierTime._2025) {
+            setTime(FrontierTime._2030);
+          } else if (time === FrontierTime._2030) {
+            setTime(FrontierTime._2035);
+          } else if (time === FrontierTime._2035) {
+            setTime(FrontierTime._2040);
+          } else if (time === FrontierTime._2040) {
+            setTime(FrontierTime.beyond);
+          }
+        }}
+        disabled={time === FrontierTime.beyond}
+        style={{
+          position: "absolute",
+          bottom: 0,
+          right: 0,
+          height: 80,
+          font: "25px Questrial",
+          background: "none",
+          color: `rgba(255, 255, 255, ${time === "beyond" ? 0.5 : 1})`,
+          border: "none",
+          cursor: "pointer",
+        }}
+      >
+        Next Future ▶
+      </button>
+      <button
+        disabled={time === FrontierTime._2025}
+        onClick={() => {
+          if (time === FrontierTime.beyond) {
+            setTime(FrontierTime._2040);
+          } else if (time === FrontierTime._2040) {
+            setTime(FrontierTime._2035);
+          } else if (time === FrontierTime._2035) {
+            setTime(FrontierTime._2030);
+          } else if (time === FrontierTime._2030) {
+            setTime(FrontierTime._2025);
+          }
+        }}
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          height: 80,
+          font: "25px Questrial",
+          background: "none",
+          color: `rgba(255, 255, 255, ${time === "2025" ? 0.5 : 1})`,
+          border: "none",
+          cursor: "pointer",
+        }}
+      >
+        ◀ Previous Future
+      </button>
     </div>
   );
 };
