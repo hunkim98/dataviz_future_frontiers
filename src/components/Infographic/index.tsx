@@ -40,7 +40,7 @@ const Infographic = () => {
     toast(`Timeline set to ${time}`, {
       icon: "👏",
       style: {
-        fontFamily: "Roboto",
+        fontFamily: "Questrial",
         borderRadius: "10px",
         background: "#333",
         color: "#fff",
